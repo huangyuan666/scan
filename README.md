@@ -15,7 +15,7 @@
 优     点:小巧,方便,强大
 
  1. 扫描特定账主机的端口信息 python scan.py -host 127.0.0.1
-    ![](images/scanHost.png) scan.py -ah 10.86.65.1-255
+    ![](images/scanHost.png) 
     
 2. 扫描一定范围内的存活主机  python scan.py -ah 10.86.65.1-255
     ![](images/scanAlive.png)

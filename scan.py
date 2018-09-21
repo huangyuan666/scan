@@ -2,6 +2,7 @@
 import threading, socket,time,os,queue
 from module import printc
 from module import queue
+from module import queue
 from module import argparse
 
 #扫描常用端口
