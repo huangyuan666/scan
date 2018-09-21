@@ -1,7 +1,6 @@
 # -- coding: utf-8 --
-import threading, socket,time,os,queue
+import threading, socket,time,os
 from module import printc
-from module import queue
 from module import queue
 from module import argparse
 
