@@ -15,7 +15,7 @@ PortList=[21,22,23,25,31,42,53,67,68,69,79,80,85,99,102,109,135,137,138,139,143,
 14620,14621,21440,21441,28317,35432,62078,63342,65000]
 #判断主机是否存活的端口
 ports=[135,80,139,443,445,62078]
-#设置扫描线程数
+#线程个数
 nThread = 30
 #线程锁
 lock = threading.Lock()
@@ -35,6 +35,17 @@ def GetQueue(list):
     for p in list:
         PortQueue.put(p)
     return PortQueue
+#这是一个工具类,里面放着一些常见的工具函数
+
+class Tool():
+    #判断用户输入的线程数
+    def nThreads(self,num):
+        global nThread
+        num=int(num)
+        if num>0 and num<101:
+            nThread=num
+
+
 
 #扫描包括扫描端口和扫描主机
 class ScanThread(threading.Thread):
@@ -90,6 +101,7 @@ class ScanThreadSingle(ScanThread):
         while not self.SingleQueue.empty():
             p = self.SingleQueue.get()
             self.ping_ports(p)
+
 #扫描存活主机类
 class scanHosts(ScanThread):
     def __init__(self, scanIP, SingleQueue):
@@ -148,14 +160,13 @@ def scan_specific_hosts(ip_addr,port):
     return isAlive
 #发现所有存活主机
 def scan_all_hosts(ip_add):
-    global openNum
+    global openNum,nThread
     ip_add=ip_add.replace("-",".")
     ip_add=ip_add.split(".")
     l=ip_add[3]
     r=ip_add[4]
     ip_pre=str(ip_add[0])+'.'+str(ip_add[1])+'.'+str(ip_add[2])+'.'
     start_time = time.time()
-    global nThread
     ThreadList = []
     hostLists=[]#存放扫描范围的主机
     strIP = ip_add
@@ -177,57 +188,66 @@ def scan_all_hosts(ip_add):
     printc.printf(s3, "skyblue")
 
 def menu():
+    global nThread,ports
+    tool=Tool()
     usage = """ 
        -host To scan the open ports of the Host
        -sh  Specific Host Detective                                        Example: -sh 127.0.0.1 
        -ah  All alive Hosts Find all alive alive hosts                     Example: -ah 192.168.1.1-255
-       --h To show help information
+       -t   Threads(1-100) Default is 30
+       -help To show help information
     """
     parser = argparse.ArgumentParser()
     parser.add_argument('-host', dest='host', help='-h To scan the open ports of the Host')
     parser.add_argument('-ah', dest='ah', help='Specific Host Detective                                        Example: -sh 127.0.0.1 ')
     parser.add_argument('-sh', dest='sh', help='All alive Hosts Find all alive alive hosts                     Example: -ah 192.168.1.1-255')
-    parser.add_argument('--h', action="store_true", help='To show help information')
+    parser.add_argument('-t', dest='t', help='Threads(1-100) Default is 30')
+    parser.add_argument('-help', action="store_true", help='To show help information')
     options = parser.parse_args()
+    #如果用户输入了线程数,改变线程数
+    if options.t:
+        tool.nThreads(options.t)
+        if options.host:
+            s = options.host
+            scan_host_ports(s)
+        elif options.ah :
+            ip_addr = options.ah
+            scan_all_hosts(str(ip_addr))
+    # 如果用户没有输入线程数则按默认nThreas=30来执行
+    if not options.t:
+        if options.host:
+            s = options.host
+            scan_host_ports(s)
+        if options.ah:
+            ip_addr = options.ah
+            scan_all_hosts(str(ip_addr))
+        if options.sh:
+            flag = False
+            ip_addr = options.sh
+            for port in ports:
+                if (scan_specific_hosts(ip_addr, port) == True):
+                    flag = True
+                    break
+            if flag == True:
+                s1 = "[+] " + str(ip_addr) + "存活"
+                printc.printf(s1, "green")
+            else:
+                s1 = "[+] " + str(ip_addr) + "关闭"
+                printc.printf(s1, "darkred")
+        if options.help:
+              helpInfo()
 
-    if options.host:
-        s = options.host
-        scan_host_ports(s)
 
-    elif options.sh:
-        global ports
-        flag=False
-        ip_addr = options.sh
-        for port in ports:
-            if(scan_specific_hosts(ip_addr,port)==True):
-                flag=True
-                break
-        if flag==True:
-            s1="[+] "+str(ip_addr)+"存活"
-            printc.printf(s1,"green")
-        else:    
-            s1 = "[+] " + str(ip_addr) + "关闭"
-            printc.printf(s1, "darkred")
-
-
-    elif options.ah:
-        ip_addr = options.ah
-        scan_all_hosts(str(ip_addr))
-    else:
-        helpInfo()
 
 def helpInfo():
     helpInformaiton = """Usage:
        -host To scan the open ports of the Host
        -sh  Specific Host Detective                                        Example: -sh 127.0.0.1 
        -ah  All alive Hosts Find all alive alive hosts                     Example: -ah 192.168.1.1-255
-       --h To show help information
+       -t   Threads(1-100) Default is 30
+       -help To show help information
         """
-    print(helpInformaiton)
+    printc.printf(helpInformaiton,"blue")
 
 if __name__=='__main__':
-    # scan_all_hosts("10.1.89.1-255")
-    # scan_host_ports("127.0.0.1")
-    # s=scan_specific_hosts("192.168.31.206",135)
-    # print(s)
     menu()

@@ -6,11 +6,12 @@
 
 您只需要输入python scan.py就可以并且得到如下结果:
 	 	
-       Usage:
+     Usage:
        -host To scan the open ports of the Host
        -sh  Specific Host Detective                                        Example: -sh 127.0.0.1
        -ah  All alive Hosts Find all alive alive hosts                     Example: -ah 192.168.1.1-255
-       --h To show help information
+       -t   Threads(1-100) Default is 30
+       -help To show help information
 
 优     点:小巧,方便,强大
 
@@ -35,11 +36,12 @@ What you need to do is just download it and use it because have packaged all thi
 
 What you need to do is just type python scan.py and then you can get the result as follows
 
-      Usage:
+     Usage:
        -host To scan the open ports of the Host
        -sh  Specific Host Detective                                        Example: -sh 127.0.0.1
        -ah  All alive Hosts Find all alive alive hosts                     Example: -ah 192.168.1.1-255
-       --h To show help information
+       -t   Threads(1-100) Default is 30
+       -help To show help information
 
 
 Advantage:small but powerful 
