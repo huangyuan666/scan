@@ -199,8 +199,8 @@ def menu():
     """
     parser = argparse.ArgumentParser()
     parser.add_argument('-host', dest='host', help='-h To scan the open ports of the Host')
-    parser.add_argument('-ah', dest='ah', help='Specific Host Detective                                        Example: -sh 127.0.0.1 ')
-    parser.add_argument('-sh', dest='sh', help='All alive Hosts Find all alive alive hosts                     Example: -ah 192.168.1.1-255')
+    parser.add_argument('-sh', dest='sh', help='Specific Host Detective                                        Example: -sh 127.0.0.1 ')
+    parser.add_argument('-ah', dest='ah', help='All alive Hosts Find all alive alive hosts                     Example: -ah 192.168.1.1-255')
     parser.add_argument('-t', dest='t', help='Threads(1-100) Default is 30')
     parser.add_argument('-help', action="store_true", help='To show help information')
     options = parser.parse_args()
