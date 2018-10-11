@@ -38,7 +38,7 @@
     ![](https://raw.githubusercontent.com/spacesec/images/master/scan/scanfromFiles.png)
 
  5. 指定扫描端口 python scan.py -r "C:\Users\Ma\Desktop\1.txt" -t 200 -p "80"
-    ![](https://raw.githubusercontent.com/spacesec/images/master/scan/scanSpecificHost.png)
+    ![](https://raw.githubusercontent.com/spacesec/images/master/scan/scanspecialPorts.png)
 
 	
 ******************************************************************************
