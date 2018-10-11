@@ -1,11 +1,10 @@
 # -- coding: utf-8 --
-import threading, socket,time,os
+import threading, socket,time,os,re
 from module import printc
 from module import queue
 from module import argparse
-
 #扫描常用端口
-PortList=[21,22,23,25,31,42,53,67,68,69,79,80,85,99,102,109,135,137,138,139,143,161,389,443,445,456,
+PortList=[21,22,23,25,31,42,53,67,68,69,79,80,81,85,99,102,109,135,137,138,139,143,161,389,443,445,456,
 513,554,593,635,636,646,873,902,903,912,913,993,1000,1001,1029,1011,1024,1043,1044,1080,1170,1234,1245,1433,1502,1536,
 1537,1538,1539,1540,1542,1543,1544,1547,1548,1549,1801,1935,2066,2500,2504,2601,2602,2604,2869,3306,3389,3443,4000,4444,
 4224,4444,
@@ -16,7 +15,7 @@ PortList=[21,22,23,25,31,42,53,67,68,69,79,80,85,99,102,109,135,137,138,139,143,
 #判断主机是否存活的端口
 ports=[80,443]
 #线程个数
-nThread = 30
+nThread = 80
 #线程锁
 lock = threading.Lock()
 #超时时间
@@ -38,12 +37,24 @@ def GetQueue(list):
 #这是一个工具类,里面放着一些常见的工具函数
 
 class Tool():
+    global ports,PortList
     #判断用户输入的线程数
     def nThreads(self,num):
         global nThread
         num=int(num)
         if num>0 and num<201:
             nThread=num
+    #将一个list赋值给另一个list
+    def changeList(self,list1):
+        list3=[]
+        for i in list1:
+            i=int(i.replace("=",''))
+            list3.append(i)
+        return list3
+    #将一个字符串变为列表
+    def split2List(self,string):
+        list1=string.split(',')
+        return list1
 
 #扫描包括扫描端口和扫描主机
 class ScanThread(threading.Thread):
@@ -116,9 +127,8 @@ class scanHosts(ScanThread):
                     break
             if(isAlive==True):
                 openNum+=1
-                host=str(host,encoding='utf-8')
                 host=host.replace("\n",'')
-                s=str("[+] 存活:"+str(host))
+                s="[+] "+str(host)+":"+"存活"
                 printc.printf(s,"green")
                 isAlive=False
 
@@ -191,12 +201,14 @@ def scan_all_hosts(ip_add):
 def scan_all_hosts_from_file(hosts_file_add):
     try:
         global openNum,nThread
-        f=open(hosts_file_add,'rb')
-        lines = f.readlines()
+        f=open(hosts_file_add,"rb")#从文件中读取主机
+        #lines = f.readlines()#逐条读取主机
+        content=str(f.read())
+        hosts_content=re.findall("[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+",content)
         start_time = time.time()
         ThreadList = []
-        hostLists=[]
-        hostLists= lines
+        hostLists=[]#存放扫描范围的主机
+        hostLists= hosts_content  #lines
         SingleQueue = GetQueue(hostLists)
         for i in range(0, nThread):
             t = scanHosts(0, SingleQueue)
@@ -216,7 +228,7 @@ def scan_all_hosts_from_file(hosts_file_add):
 
 
 def menu():
-    global nThread,ports
+    global nThread,ports,PortList
     tool=Tool()
     usage = """ 
        -host To scan the open ports of the Host
@@ -231,69 +243,106 @@ def menu():
     parser.add_argument('-host', dest='host', help='-h To scan the open ports of the Host')
     parser.add_argument('-sh', dest='sh', help='Specific Host Detective                                        Example: -sh 127.0.0.1 ')
     parser.add_argument('-ah', dest='ah', help='All alive Hosts Find all alive alive hosts                     Example: -ah 192.168.1.1-255')
-    parser.add_argument('-t', dest='t', help='Threads(1-200) Default is 80')
+    parser.add_argument('-t', dest='t', help='Threads(1-200) Default is 30')
     parser.add_argument('-r', dest='r', help='Read hosts file                                                Example: -r "hosts.txt"')
     parser.add_argument('-p', dest='p', help='Port ping special ports,It was used to detective alive hosts   Example: -p="80,8080,443" default was 80 443')
     parser.add_argument('-help', action="store_true", help='To show help information')
     options = parser.parse_args()
     #如果用户输入了线程数,改变线程数
-    if options.t:
-        tool.nThreads(options.t)
-        if options.host:
-            s = options.host
-            scan_host_ports(s)
-        elif options.ah :
-            ip_addr = options.ah
-            scan_all_hosts(str(ip_addr))
-        elif options.r:
-            file_add=options.r
-            if options.p:
-                temp=[]
-                for i in options.p.split(","):
-                    temp.append(int(i))
-                ports=temp
-            scan_all_hosts_from_file(file_add)
-
+    #if options.t:
+        #tool.nThreads(options.t)
+    if options.host:
+        if options.t:
+            tool.nThreads(options.t)
+        if options.p:
+            PortList=tool.changeList(tool.split2List(options.p))
+            msg1=msg2=''
+            for i in PortList:
+                msg1+=str(i)+' '
+            msg2="[*] Scanning Ports :"+msg1
+            printc.printf(msg2,"skyblue")
+        s = options.host
+        scan_host_ports(s)
+    elif options.ah :
+        if options.t:
+            tool.nThreads(options.t)
+        if options.p:
+            ports = tool.changeList(tool.split2List(options.p))
+            msg1 = msg2 = ''
+            for i in ports:
+                msg1 += str(i) + ' '
+            msg2 = "[*] Scanning Ports :" + msg1
+            printc.printf(msg2, "skyblue")
+        ip_addr = options.ah
+        scan_all_hosts(str(ip_addr))
+    elif options.r:
+        if options.t:
+            tool.nThreads(options.t)
+        if options.p:
+            ports = tool.changeList(tool.split2List(options.p))
+            msg1 = msg2 = ''
+            for i in ports:
+                msg1 += str(i) + ' '
+            msg2 = "[*] Scanning Ports :" + msg1
+            printc.printf(msg2, "skyblue")
+        file_add=options.r
+        scan_all_hosts_from_file(file_add)
+    elif options.sh:
+        if options.p:
+            ports = tool.changeList(tool.split2List(options.p))
+            msg1 = msg2 = ''
+            for i in ports:
+                msg1 += str(i) + ' '
+            msg2 = "[*] Scanning Ports :" + msg1
+            printc.printf(msg2, "skyblue")
+        flag = False
+        ip_addr = options.sh
+        for port in ports:
+            if (scan_specific_hosts(ip_addr, port) == True):
+                flag = True
+                break
+        if flag == True:
+            s1 = "[+] " + str(ip_addr) + "存活"
+            printc.printf(s1, "green")
+        else:
+            s1 = "[+] " + str(ip_addr) + "关闭"
+            printc.printf(s1, "darkred")
     # 如果用户没有输入线程数则按默认nThreas=80来执行
-    if not options.t:
-        if options.host:
-            s = options.host
-            scan_host_ports(s)
-        if options.ah:
-            ip_addr = options.ah
-            scan_all_hosts(str(ip_addr))
-        elif options.r:
-            file_add = options.r
-            if options.p:
-                temp=[]
-                for i in options.p.split(","):
-                    temp.append(int(i))
-                ports=temp
-            scan_all_hosts_from_file(file_add)
-        if options.sh:
-            flag = False
-            ip_addr = options.sh
-            for port in ports:
-                if (scan_specific_hosts(ip_addr, port) == True):
-                    flag = True
-                    break
-            if flag == True:
-                s1 = "[+] " + str(ip_addr) + "存活"
-                printc.printf(s1, "green")
-            else:
-                s1 = "[+] " + str(ip_addr) + "关闭"
-                printc.printf(s1, "darkred")
-        if options.help:
+    #if not options.t:
+        # if options.host:
+        #     s = options.host
+        #     scan_host_ports(s)
+        # if options.ah:
+        #     ip_addr = options.ah
+        #     scan_all_hosts(str(ip_addr))
+        # elif options.r:
+        #     file_add=options.r
+        #     scan_all_hosts_from_file(file_add)
+        # if options.sh:
+        #     flag = False
+        #     ip_addr = options.sh
+        #     for port in ports:
+        #         if (scan_specific_hosts(ip_addr, port) == True):
+        #             flag = True
+        #             break
+        #     if flag == True:
+        #         s1 = "[+] " + str(ip_addr) + "存活"
+        #         printc.printf(s1, "green")
+        #     else:
+        #         s1 = "[+] " + str(ip_addr) + "关闭"
+        #         printc.printf(s1, "darkred")
+    if options.help:
               helpInfo()
 
 def helpInfo():
     helpInformaiton = """Usage:
-       -host To scan the open ports of the Host
-       -sh  Specific Host Detective                                        Example: -sh 127.0.0.1 
-       -ah  All alive Hosts Find all alive alive hosts                     Example: -ah 192.168.1.1-255
-       -t   Threads(1-200) Default is 80
-       -r   Read hosts file                                                Example: -r "hosts.txt"
-       -help To show help information
+       -host  To scan the open ports of the Host
+       -sh    Specific Host Detective                                        Example: -sh 127.0.0.1 
+       -ah    All alive Hosts Find all alive alive hosts                     Example: -ah 192.168.1.1-255
+       -t     Threads(1-200) Default is 30
+       -r     Read hosts file                                                Example: -r "hosts.txt"
+       -p     Port ping special ports,It was used to detective alive hosts   Example: -p="80,8080,443" default was 80 443 
+       -help  To show help information
         """
     printc.printf(helpInformaiton,"blue")
 

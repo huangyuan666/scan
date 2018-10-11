@@ -2,8 +2,9 @@
 ========
 ## 更新说明:
    1) 新增 -r 参数,可以直接从文件里面读取主机并且扫描存活情况
-   2) 新增 -p 参数,用户可以自己设定扫描端口
-   3) 改变之前的线程设置策略,线程设置由原来的1-100(默认30)改变为1-200(默认80)扫描速度更快
+   2) 新增正则表达式,意味着您在让程序读取文件时不用对文件做任何处理(即便里面有中文或者其他无用信息),程序会自动筛选有效信息
+   3) 新增 -p 参数,用户可以自己设定扫描端口
+   4) 改变之前的线程设置策略,线程设置由原来的1-100(默认30)改变为1-200(默认80)扫描速度更快
 
 
 
@@ -27,10 +28,16 @@
  1. 扫描特定账主机的端口信息 python scan.py -host 127.0.0.1
     ![](https://raw.githubusercontent.com/spacesec/images/master/scan/scanHost.png) 
     
-2. 扫描一定范围内的存活主机  python scan.py -ah 10.86.65.1-255
+ 2. 扫描一定范围内的存活主机  python scan.py -ah 10.86.65.1-255
     ![](https://raw.githubusercontent.com/spacesec/images/master/scan/scanAlive.png)
 	
  3. 扫描特定主机存活状态 scan.py -sp 127.0.0.1
+    ![](https://raw.githubusercontent.com/spacesec/images/master/scan/scanSpecificHost.png)
+ 
+ 4. 从文件中读取主机并扫描存活状态 python scan.py -r "C:\Users\Ma\Desktop\1.txt" -t 200
+    ![](https://raw.githubusercontent.com/spacesec/images/master/scan/scanfromFiles.png)
+
+ 5. 指定扫描端口 python scan.py -r "C:\Users\Ma\Desktop\1.txt" -t 200 -p "80"
     ![](https://raw.githubusercontent.com/spacesec/images/master/scan/scanSpecificHost.png)
 
 	
