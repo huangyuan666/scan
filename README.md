@@ -9,14 +9,13 @@
 
 
 
-
 这是一款基于python3的小巧的扫描工具
 
 我已经将需要的模块封装好了,只需要下载即可使用
 
-您只需要输入python scan.py就可以并且得到如下结果:
-	 	
-Usage:
+您只需要输入python scan.py就可以并且得到如下结果:	
+
+   Usage:
        -host To scan the open ports of the Host
        -sh  Specific Host Detective                                        Example: -sh 127.0.0.1
        -ah  All alive Hosts Find all alive alive hosts                     Example: -ah 192.168.1.1-255
@@ -25,6 +24,8 @@ Usage:
        -p   Port ping special ports,It was used to detective alive hosts   Example: -p="80,8080,443" default was 80 443
        -o   Output file address                                            Example: -o recoder.txt or -o D:\recoder.txt
        -help To show help information
+
+
 
 优     点:小巧,方便,强大
 
@@ -66,7 +67,7 @@ What you need to do is just download it and use it because have packaged all thi
 
 What you need to do is just type python scan.py and then you can get the result as follows
 
-Usage:
+ Usage:
        -host To scan the open ports of the Host
        -sh  Specific Host Detective                                        Example: -sh 127.0.0.1
        -ah  All alive Hosts Find all alive alive hosts                     Example: -ah 192.168.1.1-255
