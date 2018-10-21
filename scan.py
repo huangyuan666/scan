@@ -1,5 +1,5 @@
 # -- coding: utf-8 --
-import threading, socket,time,os,re
+import threading, socket,time,os,re,sys
 from module import printc
 from module import queue
 from module import argparse
@@ -55,6 +55,67 @@ class Tool():
     def split2List(self,string):
         list1=string.split(',')
         return list1
+    #扫描从hosts.txt文件中读取出来的主机存活端口信息    
+    def scan_host_ports(self,ip):
+        s1 =  '[*] Scanning:{ip}'.format(ip=ip)
+        printc.printf(s1, "skyblue")
+        start_time = time.time()
+        global nThread, PortList
+        ThreadList = []
+        strIP = ip
+        SingleQueue = GetQueue(PortList)
+        for i in range(0, nThread):
+            t = ScanThreadSingle(strIP, SingleQueue)
+            ThreadList.append(t)
+        for t in ThreadList:
+            t.start()
+        for t in ThreadList:
+            t.join()
+        # s1 =  '[*] The scanning is finished'
+        # s2 =  '[*] A total of %d ports is open' % (openNum)
+        # s3=   '[*] Time cost :' + str((time.time() - start_time)) + ' s'
+        # printc.printf(s1, "skyblue")
+        # printc.printf(s2, "skyblue")
+        # printc.printf(s3, "skyblue")
+    #获取当前时间
+    def getTime(self):
+        presentTime = time.strftime("%Y-%m-%d %H:%M:%S",time.localtime(time.time()))
+        return presentTime
+    #将输出的内容保存到一个txt文件中
+    def output(self,add):
+        #if add :
+        # if ":" in add:
+        #     address=add
+        # else:
+        #     address="D:\\"+str(add)
+        # else:
+        #     address="D:\\"+str(self.getTime())+".txt"
+        # address = re.sub("(?<=\d)(:)","-",address)
+        sys.stdout = Logger(add)
+    #存放输出文件的文件名
+    def address(self,add):
+        if ":" in add:
+            address=add
+        else:
+            address="D:\\"+str(add)
+        return address
+    #如果存在输入文件则打印,否则不打印    
+    def printIfExist(self,address):
+        if address:
+            s="[*] The result file is at {add}".format(add=address)
+            printc.printf(s, "skyblue")
+
+
+
+class Logger(object):
+    def __init__(self, fileN="Default.log"):
+        self.terminal = sys.stdout
+        self.log = open(fileN, "a")
+    def write(self, message):
+        self.terminal.write(message)
+        self.log.write(message)
+    def flush(self):
+        pass
 
 #扫描包括扫描端口和扫描主机
 class ScanThread(threading.Thread):
@@ -191,7 +252,7 @@ def scan_all_hosts(ip_add):
     for t in ThreadList:
         t.join()
     s1 = '[*] The scanning is finished'
-    s2 = '[*] A total of %d hosts is open' % (openNum)
+    s2 = '[*] A total of %d hosts are open' % (openNum)
     s3 = '[*] Time cost :' + str((time.time() - start_time)) + ' s'
     printc.printf(s1, "skyblue")
     printc.printf(s2, "skyblue")
@@ -201,6 +262,7 @@ def scan_all_hosts(ip_add):
 def scan_all_hosts_from_file(hosts_file_add):
     try:
         global openNum,nThread
+        tool=Tool()
         f=open(hosts_file_add,"rb")#从文件中读取主机
         #lines = f.readlines()#逐条读取主机
         content=str(f.read())
@@ -210,18 +272,22 @@ def scan_all_hosts_from_file(hosts_file_add):
         hostLists=[]#存放扫描范围的主机
         hostLists= hosts_content  #lines
         SingleQueue = GetQueue(hostLists)
-        for i in range(0, nThread):
-            t = scanHosts(0, SingleQueue)
-            ThreadList.append(t)
-        for t in ThreadList:
-            t.start()
-        for t in ThreadList:
-            t.join()
+        while not SingleQueue.empty():
+            ip = SingleQueue.get()
+            tool.scan_host_ports(ip)
+        SingleQueue = GetQueue(hostLists)
+        # for i in range(0, nThread):
+        #     t = scanHosts(0, SingleQueue)
+        #     ThreadList.append(t)
+        # for t in ThreadList:
+        #     t.start()
+        # for t in ThreadList:
+        #     t.join()
         s1 = '[*] The scanning is finished'
-        s2 = '[*] A total of %d hosts is open' % (openNum)
+        #s2 = '[*] A total of %d hosts are open' % (openNum)
         s3 = '[*] Time cost :' + str((time.time() - start_time)) + ' s'
         printc.printf(s1, "skyblue")
-        printc.printf(s2, "skyblue")
+        #printc.printf(s2, "skyblue")
         printc.printf(s3, "skyblue")
     except:
         print("结束")
@@ -230,6 +296,7 @@ def scan_all_hosts_from_file(hosts_file_add):
 def menu():
     global nThread,ports,PortList
     tool=Tool()
+    address=""
     usage = """ 
        -host To scan the open ports of the Host
        -sh  Specific Host Detective                                        Example: -sh 127.0.0.1 
@@ -237,6 +304,7 @@ def menu():
        -t   Threads(1-200) Default is 80
        -r   Read hosts file                                                Example: -r "hosts.txt"
        -p   Port ping special ports,It was used to detective alive hosts   Example: -p="80,8080,443" default was 80 443 
+       -o   Output file address                                            Example: -o recoder.txt or -o D:\\recoder.txt
        -help To show help information
     """
     parser = argparse.ArgumentParser()
@@ -246,12 +314,19 @@ def menu():
     parser.add_argument('-t', dest='t', help='Threads(1-200) Default is 30')
     parser.add_argument('-r', dest='r', help='Read hosts file                                                Example: -r "hosts.txt"')
     parser.add_argument('-p', dest='p', help='Port ping special ports,It was used to detective alive hosts   Example: -p="80,8080,443" default was 80 443')
+    parser.add_argument('-o', dest='o', help='Output file address                                            Example: -o recoder.txt or -o D:\\recoder.txt')
     parser.add_argument('-help', action="store_true", help='To show help information')
     options = parser.parse_args()
     #如果用户输入了线程数,改变线程数
     #if options.t:
         #tool.nThreads(options.t)
     if options.host:
+        #address=tool.address(options.o)
+        if options.o:
+            address=tool.address(options.o)   
+            tool.output(address)
+        # add=""
+        # tool.output(add)
         if options.t:
             tool.nThreads(options.t)
         if options.p:
@@ -263,7 +338,11 @@ def menu():
             printc.printf(msg2,"skyblue")
         s = options.host
         scan_host_ports(s)
+        tool.printIfExist(address)
     elif options.ah :
+        if options.o:
+            address=tool.address(options.o)   
+            tool.output(address)
         if options.t:
             tool.nThreads(options.t)
         if options.p:
@@ -275,18 +354,23 @@ def menu():
             printc.printf(msg2, "skyblue")
         ip_addr = options.ah
         scan_all_hosts(str(ip_addr))
+        tool.printIfExist(address)
     elif options.r:
+        if options.o:
+            address=tool.address(options.o)   
+            tool.output(address)
         if options.t:
             tool.nThreads(options.t)
         if options.p:
-            ports = tool.changeList(tool.split2List(options.p))
+            PortList = tool.changeList(tool.split2List(options.p))
             msg1 = msg2 = ''
-            for i in ports:
+            for i in PortList:
                 msg1 += str(i) + ' '
             msg2 = "[*] Scanning Ports :" + msg1
             printc.printf(msg2, "skyblue")
         file_add=options.r
         scan_all_hosts_from_file(file_add)
+        tool.printIfExist(address)
     elif options.sh:
         if options.p:
             ports = tool.changeList(tool.split2List(options.p))
@@ -336,13 +420,14 @@ def menu():
 
 def helpInfo():
     helpInformaiton = """Usage:
-       -host  To scan the open ports of the Host
-       -sh    Specific Host Detective                                        Example: -sh 127.0.0.1 
-       -ah    All alive Hosts Find all alive alive hosts                     Example: -ah 192.168.1.1-255
-       -t     Threads(1-200) Default is 30
-       -r     Read hosts file                                                Example: -r "hosts.txt"
-       -p     Port ping special ports,It was used to detective alive hosts   Example: -p="80,8080,443" default was 80 443 
-       -help  To show help information
+       -host To scan the open ports of the Host
+       -sh  Specific Host Detective                                        Example: -sh 127.0.0.1 
+       -ah  All alive Hosts Find all alive alive hosts                     Example: -ah 192.168.1.1-255
+       -t   Threads(1-200) Default is 80
+       -r   Read hosts file                                                Example: -r "hosts.txt"
+       -p   Port ping special ports,It was used to detective alive hosts   Example: -p="80,8080,443" default was 80 443 
+       -o   Output file address                                            Example: -o recoder.txt or -o D:\\recoder.txt
+       -help To show help information
         """
     printc.printf(helpInformaiton,"blue")
 
