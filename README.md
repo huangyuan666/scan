@@ -1,21 +1,19 @@
 ﻿﻿﻿中文说明:
 ========
 ## 更新说明:
-   1) 新增全局 -o 参数,您可以保存存任意输出的结果
-   2) 改变 -r 参数功能使其既可以采用默认方式扫描开放端口,也可以扫描特定的端口开放情况
-   3) 新增正则表达式,意味着您在让程序读取文件时不用对文件做任何处理(即便里面有中文或者其他无用信息),程序会自动筛选有效信息
-   4) 新增全局 -p 参数,用户可以自己设定扫描端口
-   5) 改变之前的线程设置策略,线程设置由原来的1-100(默认30)改变为1-200(默认80)扫描速度更快
-
-
+   1. 新增全局 -o 参数,您可以保存存任意输出的结果
+   2. 改变 -r 参数功能使其既可以采用默认方式扫描开放端口,也可以扫描特定的端口开放情况
+   3. 新增正则表达式,意味着您在让程序读取文件时不用对文件做任何处理(即便里面有中文或者其他无用信息),程序会自动筛选有效信息
+   4. 新增全局 -p 参数,用户可以自己设定扫描端口
+   5. 改变之前的线程设置策略,线程设置由原来的1-100(默认30)改变为1-200(默认80)扫描速度更快
 
 这是一款基于python3的小巧的扫描工具
 
 我已经将需要的模块封装好了,只需要下载即可使用
 
 您只需要输入python scan.py就可以并且得到如下结果:	
+Usage:
 
-   Usage:
        -host To scan the open ports of the Host
        -sh  Specific Host Detective                                        Example: -sh 127.0.0.1
        -ah  All alive Hosts Find all alive alive hosts                     Example: -ah 192.168.1.1-255
@@ -66,8 +64,8 @@ This is an powerful scanner based on python
 What you need to do is just download it and use it because have packaged all third-part modules
 
 What you need to do is just type python scan.py and then you can get the result as follows
-
  Usage:
+       
        -host To scan the open ports of the Host
        -sh  Specific Host Detective                                        Example: -sh 127.0.0.1
        -ah  All alive Hosts Find all alive alive hosts                     Example: -ah 192.168.1.1-255
