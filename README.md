@@ -33,7 +33,7 @@ Usage:
  2. 扫描一定范围内的存活主机  python scan.py -ah 10.86.65.1-255
     ![](https://raw.githubusercontent.com/spacesec/images/master/scan/scanAlive.png)
 	
- 3. 扫描特定主机存活状态 scan.py -sp 127.0.0.1
+ 3. 扫描特定主机存活状态 scan.py -sh 127.0.0.1
     ![](https://raw.githubusercontent.com/spacesec/images/master/scan/scanSpecificHost.png)
  
  4. 从文件中读取主机并扫描端口存活状态 python scan.py -r "C:\Users\Ma\Desktop\1.txt" -t 200
