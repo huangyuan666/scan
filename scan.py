@@ -92,6 +92,7 @@ class Tool():
         #     address="D:\\"+str(self.getTime())+".txt"
         # address = re.sub("(?<=\d)(:)","-",address)
         sys.stdout = Logger(add)
+
     #存放输出文件的文件名
     def address(self,add):
         if ":" in add:
@@ -104,13 +105,24 @@ class Tool():
         if address:
             s="[*] The result file is at {add}".format(add=address)
             printc.printf(s, "skyblue")
-
-
+    # #利用正则表达式匹配一些无用的信息并删除        
+    # def deleteUselessInfoOfFiles(add):
+    #     rule=["[*] The scanning is finished","[*] A total of \d+ hosts are open","[*] Time cost :\d+\.\d+ s"]
+    #     f = open(add,"r+")
+    #     for line in f.readlines():
+    #         #print(line)
+    #         for r in rule:
+    #             stringList=re.findall(r,line)
+    #             print(stringList)
+    #             if stringList:
+    #                 f.write(line.replace(stringList[0],""))
+    #             else:
+    #                 f.write(line)
 
 class Logger(object):
     def __init__(self, fileN="Default.log"):
         self.terminal = sys.stdout
-        self.log = open(fileN, "a")
+        self.log = open(fileN, "w+")
     def write(self, message):
         self.terminal.write(message)
         self.log.write(message)
@@ -179,17 +191,19 @@ class scanHosts(ScanThread):
         self.SingleQueue = SingleQueue
     def run(self):
         global openNum
+        openedPort=''
         isAlive=False
         while not self.SingleQueue.empty():
             host = self.SingleQueue.get()
             for port in ports:
                 if(self.ping_hosts(host,port)==True):
                     isAlive=True
+                    openedPort=port
                     break
             if(isAlive==True):
                 openNum+=1
                 host=host.replace("\n",'')
-                s="[+] "+str(host)+":"+"存活"
+                s="[+] "+str(host)+":"+str(openedPort)+" "+"存活"
                 printc.printf(s,"green")
                 isAlive=False
 
@@ -261,7 +275,7 @@ def scan_all_hosts(ip_add):
 #扫描所有从文件中读取出的存活主机
 def scan_all_hosts_from_file(hosts_file_add):
     try:
-        global openNum,nThread
+        global openNum,nThread,PortList
         tool=Tool()
         f=open(hosts_file_add,"rb")#从文件中读取主机
         #lines = f.readlines()#逐条读取主机
@@ -271,18 +285,20 @@ def scan_all_hosts_from_file(hosts_file_add):
         ThreadList = []
         hostLists=[]#存放扫描范围的主机
         hostLists= hosts_content  #lines
-        SingleQueue = GetQueue(hostLists)
-        while not SingleQueue.empty():
-            ip = SingleQueue.get()
-            tool.scan_host_ports(ip)
-        SingleQueue = GetQueue(hostLists)
-        # for i in range(0, nThread):
-        #     t = scanHosts(0, SingleQueue)
-        #     ThreadList.append(t)
-        # for t in ThreadList:
-        #     t.start()
-        # for t in ThreadList:
-        #     t.join()
+        if len(PortList)>2:
+            SingleQueue = GetQueue(hostLists)
+            while not SingleQueue.empty():
+                ip = SingleQueue.get()
+                tool.scan_host_ports(ip)
+        else:
+            SingleQueue = GetQueue(hostLists)
+            for i in range(0, nThread):
+                t = scanHosts(0, SingleQueue)
+                ThreadList.append(t)
+            for t in ThreadList:
+                t.start()
+            for t in ThreadList:
+                t.join()
         s1 = '[*] The scanning is finished'
         #s2 = '[*] A total of %d hosts are open' % (openNum)
         s3 = '[*] Time cost :' + str((time.time() - start_time)) + ' s'
@@ -363,6 +379,7 @@ def menu():
             tool.nThreads(options.t)
         if options.p:
             PortList = tool.changeList(tool.split2List(options.p))
+            ports = tool.changeList(tool.split2List(options.p))
             msg1 = msg2 = ''
             for i in PortList:
                 msg1 += str(i) + ' '
