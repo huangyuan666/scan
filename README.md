@@ -48,9 +48,9 @@ Usage:
     ![生成的txt文件](https://raw.githubusercontent.com/spacesec/images/master/scan/2.png)
  
  7. 您可以输入任意有效的url程序会自动识别主机
-    python scan.py -host "https://tieba.baidu.com/index.html"
-    python scan.py -host "www.baidu.com"
-    python scan.py -host "baidu.com"
+    python scan.py -host "https://tieba.baidu.com/index.html"  
+    python scan.py -host "www.baidu.com"  
+    python scan.py -host "baidu.com"  
     python scan.py -host "127.0.0.1"
 ![自动识别主机](https://raw.githubusercontent.com/spacesec/images/master/scan/7.png)
 
@@ -100,8 +100,8 @@ Advantage:small but powerful
   ![生成的txt文件](https://raw.githubusercontent.com/spacesec/images/master/scan/2.png)
 
  7. Type any urls or ip
-    python scan.py -host "https://tieba.baidu.com/index.html"
-    python scan.py -host "www.baidu.com"
-    python scan.py -host "baidu.com"
+    python scan.py -host "https://tieba.baidu.com/index.html"  
+    python scan.py -host "www.baidu.com"  
+    python scan.py -host "baidu.com"  
     python scan.py -host "127.0.0.1"
 ![自动识别主机](https://raw.githubusercontent.com/spacesec/images/master/scan/7.png)
