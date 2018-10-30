@@ -6,6 +6,7 @@
    3. 新增正则表达式,意味着您在让程序读取文件时不用对文件做任何处理(即便里面有中文或者其他无用信息),程序会自动筛选有效信息
    4. 新增全局 -p 参数,用户可以自己设定扫描端口
    5. 改变之前的线程设置策略,线程设置由原来的1-100(默认30)改变为1-200(默认80)扫描速度更快
+   6. 改善规则,改变之前只能输入标准主机的限定如: -host www.target.com 现在您只需要输入 -host target.com 亦或是 http://www.target.cn/xxgkw/xxfbh/201205/t20120517_155695.htm  亦或是其他格式程序都能识别
 
 这是一款基于python3的小巧的扫描工具
 
@@ -46,9 +47,15 @@ Usage:
     ![扫描结果并保存](https://raw.githubusercontent.com/spacesec/images/master/scan/1.png)
     ![生成的txt文件](https://raw.githubusercontent.com/spacesec/images/master/scan/2.png)
  
+ 7. 您可以输入任意有效的url程序会自动识别主机
+    python scan.py -host "https://tieba.baidu.com/index.html"
+    python scan.py -host "www.baidu.com"
+    python scan.py -host "baidu.com"
+    python scan.py -host "127.0.0.1"
+![自动识别主机](https://raw.githubusercontent.com/spacesec/images/master/scan/7.png)
 
-  
-	
+ 
+
 ******************************************************************************
 分割线 分割线	分割线	分割线	分割线	分割线	分割线
 ******************************************************************************
@@ -92,3 +99,9 @@ Advantage:small but powerful
   ![扫描结果并保存](https://raw.githubusercontent.com/spacesec/images/master/scan/1.png)
   ![生成的txt文件](https://raw.githubusercontent.com/spacesec/images/master/scan/2.png)
 
+ 7. Type any urls or ip
+    python scan.py -host "https://tieba.baidu.com/index.html"
+    python scan.py -host "www.baidu.com"
+    python scan.py -host "baidu.com"
+    python scan.py -host "127.0.0.1"
+![自动识别主机](https://raw.githubusercontent.com/spacesec/images/master/scan/7.png)

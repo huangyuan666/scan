@@ -1,5 +1,5 @@
 # -- coding: utf-8 --
-import threading, socket,time,os,re,sys
+import threading, socket,time,os,re,sys,string
 from module import printc
 from module import queue
 from module import argparse
@@ -118,6 +118,27 @@ class Tool():
     #                 f.write(line.replace(stringList[0],""))
     #             else:
     #                 f.write(line)
+    #判断是否字符串中是否含有数字
+    def hasNum(self,inputString):
+        return any(char.isdigit() for char in inputString)
+
+    #由于https://www.test.con http://baidu.com 使用程序是无法是别的,只有www.target.com这种才能被识别
+    #所以需要将一些非标准的转化为标准的形如www.target.com这样的
+    def standardUrl(self,url):
+        pattern="([hwtps:/]{3,}[.\w-]+\.[a-z]+)"
+        host=url
+        flag = True 
+        if self.hasNum(host) ==True:
+            flag=False
+        if flag == True:   
+            if re.search(pattern,url):
+                host=re.search(pattern,url)[1]
+            for i in ["https://","http://"]:
+                host=host.replace(i,"")
+            if "www." not in host:
+                host="www."+host
+        return host
+
 
 class Logger(object):
     def __init__(self, fileN="Default.log"):
@@ -352,7 +373,8 @@ def menu():
                 msg1+=str(i)+' '
             msg2="[*] Scanning Ports :"+msg1
             printc.printf(msg2,"skyblue")
-        s = options.host
+        s = tool.standardUrl(options.host)
+        #print(s)
         scan_host_ports(s)
         tool.printIfExist(address)
     elif options.ah :
