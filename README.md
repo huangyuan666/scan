@@ -31,8 +31,8 @@ Usage:
  1. 扫描特定账主机的端口信息 python scan.py -host 127.0.0.1
     ![](https://raw.githubusercontent.com/spacesec/images/master/scan/scanHost.png) 
     
- 2. 扫描一定范围内的存活主机  python scan.py -ah 10.86.65.1-255
-    ![](https://raw.githubusercontent.com/spacesec/images/master/scan/scanAlive.png)
+ 2. 扫描一定范围内的存活主机  python scan.py -ah 123.125.115.1-255 -t 200
+    ![](https://raw.githubusercontent.com/spacesec/images/master/scan/7.png)
 	
  3. 扫描特定主机存活状态 scan.py -sh 127.0.0.1
     ![](https://raw.githubusercontent.com/spacesec/images/master/scan/scanSpecificHost.png)

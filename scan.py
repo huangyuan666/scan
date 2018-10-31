@@ -3,6 +3,7 @@ import threading, socket,time,os,re,sys,string
 from module import printc
 from module import queue
 from module import argparse
+from module import requests
 #扫描常用端口
 PortList=[21,22,23,25,31,42,53,67,68,69,79,80,81,85,99,102,109,135,137,138,139,143,161,389,443,445,456,
 513,554,593,635,636,646,873,902,903,912,913,993,1000,1001,1029,1011,1024,1043,1044,1080,1170,1234,1245,1433,1502,1536,
@@ -14,6 +15,8 @@ PortList=[21,22,23,25,31,42,53,67,68,69,79,80,81,85,99,102,109,135,137,138,139,1
 14620,14621,21440,21441,28317,35432,62078,63342,65000]
 #判断主机是否存活的端口
 ports=[80,443]
+#后台文件不能访问的标志
+statusLists=["404","403","503"]
 #线程个数
 nThread = 80
 #线程锁
@@ -138,12 +141,22 @@ class Tool():
             if "www." not in host:
                 host="www."+host
         return host
-
-
+    #读取文件每一行并将文件内容存放在列表中
+    def content2List(self):
+        cwd=os.getcwd()
+        dirList=[]
+        add=cwd+"\\dict\\directory.txt"
+        f=open(add,"rb")
+        for line in f.readlines():
+            dirList.append(str(line)[2:-5])
+        return dirList
 class Logger(object):
     def __init__(self, fileN="Default.log"):
-        self.terminal = sys.stdout
-        self.log = open(fileN, "w+")
+        try:
+            self.terminal = sys.stdout
+            self.log = open(fileN, "w+")
+        except:
+            print("保存路径换到D盘试试")
     def write(self, message):
         self.terminal.write(message)
         self.log.write(message)
@@ -228,7 +241,29 @@ class scanHosts(ScanThread):
                 printc.printf(s,"green")
                 isAlive=False
 
-
+#扫描web可访问的后台文件目录
+class ScanBackDirectory(threading.Thread):
+    def __init__(self, host,diretoryQueue):
+        threading.Thread.__init__(self)
+        self.host=host
+        self.diretoryQueue=diretoryQueue
+    #扫描后台存在的目录
+    def run(self):
+        global statusLists
+        while not self.diretoryQueue.empty():
+            url=str(self.host)+"/"+str(self.diretoryQueue.get())
+            status=str(requests.get(url))
+            for i in statusLists:
+                if i in status:
+                    # s1="[-]:"+url+" 不存在"
+                    # printc.printf(s1,"red")
+                    break
+                else:
+                    s2 = "[+]:" + url + " 存在"
+                    printc.printf(s2, "green")
+                    #print(threading.get_ident())线程ID
+                    break
+            
 #扫描端口
 def scan_host_ports(ip):
     start_time = time.time()
@@ -328,7 +363,28 @@ def scan_all_hosts_from_file(hosts_file_add):
         printc.printf(s3, "skyblue")
     except:
         print("结束")
-
+#扫描后台可访问的目录
+def scanDir(host,dirlists):
+    try:
+        global nThread
+        #print("线程数"+str(nThread))
+        start_time=time.time()
+        ThreadList = []
+        #dir=['web','cgi-bin','appserv','bWAPP','demon']
+        dir = GetQueue(dirlists)
+        for i in range(0, nThread):
+            t = ScanBackDirectory(host,dir)
+            ThreadList.append(t)
+        for t in ThreadList:
+            t.start()
+        for t in ThreadList:
+            t.join()
+        s1 = '[*] The scanning is finished'
+        s2 = '[*] Time cost :' + str((time.time() - start_time)) + ' s'
+        printc.printf(s1, "skyblue")
+        printc.printf(s2, "skyblue")
+    except:
+        print("结束")
 
 def menu():
     global nThread,ports,PortList
@@ -342,6 +398,7 @@ def menu():
        -r   Read hosts file                                                Example: -r "hosts.txt"
        -p   Port ping special ports,It was used to detective alive hosts   Example: -p="80,8080,443" default was 80 443 
        -o   Output file address                                            Example: -o recoder.txt or -o D:\\recoder.txt
+       -dir Scanning visible background directory                          Example: -dir http://127.0.0.1
        -help To show help information
     """
     parser = argparse.ArgumentParser()
@@ -352,6 +409,7 @@ def menu():
     parser.add_argument('-r', dest='r', help='Read hosts file                                                Example: -r "hosts.txt"')
     parser.add_argument('-p', dest='p', help='Port ping special ports,It was used to detective alive hosts   Example: -p="80,8080,443" default was 80 443')
     parser.add_argument('-o', dest='o', help='Output file address                                            Example: -o recoder.txt or -o D:\\recoder.txt')
+    parser.add_argument('-dir', dest='dir', help='Scanning visible background directory                          Example: -dir http://127.0.0.1' )
     parser.add_argument('-help', action="store_true", help='To show help information')
     options = parser.parse_args()
     #如果用户输入了线程数,改变线程数
@@ -430,6 +488,16 @@ def menu():
         else:
             s1 = "[+] " + str(ip_addr) + "关闭"
             printc.printf(s1, "darkred")
+    elif options.dir:
+        if options.o:
+            address=tool.address(options.o)   
+            tool.output(address)
+        if options.t:
+            tool.nThreads(options.t)
+        host=options.dir
+        dirList=tool.content2List()
+        scanDir(host,dirList)
+        tool.printIfExist(address)
     # 如果用户没有输入线程数则按默认nThreas=80来执行
     #if not options.t:
         # if options.host:
@@ -466,9 +534,12 @@ def helpInfo():
        -r   Read hosts file                                                Example: -r "hosts.txt"
        -p   Port ping special ports,It was used to detective alive hosts   Example: -p="80,8080,443" default was 80 443 
        -o   Output file address                                            Example: -o recoder.txt or -o D:\\recoder.txt
+       -dir Scanning visible background directory                          Example: -dir http://127.0.0.1
        -help To show help information
         """
     printc.printf(helpInformaiton,"blue")
 
 if __name__=='__main__':
     menu()
+    # scanDir("http://127.0.0.1")
+
