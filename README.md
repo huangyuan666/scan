@@ -1,12 +1,16 @@
 ﻿﻿﻿中文说明:
 ========
 ## 更新说明:
-   1. 新增全局 -o 参数,您可以保存存任意输出的结果
-   2. 改变 -r 参数功能使其既可以采用默认方式扫描全部开放端口,也可以扫描特定的端口开放情况
-   3. 新增正则表达式,意味着您在让程序读取文件时不用对文件做任何处理(即便里面有中文或者其他无用信息),程序会自动筛选有效信息
-   4. 新增全局 -p 参数,用户可以自己设定扫描端口
-   5. 改变之前的线程设置策略,线程设置由原来的1-100(默认30)改变为1-200(默认80)扫描速度更快
-   6. 改善规则,改变之前只能输入标准主机的限定如: -host www.target.com 现在您只需要输入 -host target.com 亦或是 http://www.target.cn/xxgkw/xxfbh/201205/t20120517_155695.htm  亦或是其他格式程序都能识别
+   1. 新增-dir参数 扫描后台文件和目录,
+   2. 新增-add参数,用户既可以使用自己的字典也可以使用默认字典
+   3. 新增线程锁解决输出颜色不一致的问题
+   4. 新增全局 -o 参数,您可以保存存任意输出的结果
+   5. 改变 -r 参数功能使其既可以采用默认方式扫描全部开放端口,也可以扫描特定的端口开放情况
+   6. 新增正则表达式,意味着您在让程序读取文件时不用对文件做任何处理(即便里面有中文或者其他无用信息),程序会自动筛选有效信息
+   7. 新增全局 -p 参数,用户可以自己设定扫描端口
+   8. 改变之前的线程设置策略,线程设置由原来的1-100(默认30)改变为1-200(默认80)扫描速度更快
+   9. 改善规则,改变之前只能输入标准主机的限定如: -host www.target.com 现在您只需要输入 -host target.com 亦或是 http://www.target.cn/xxgkw/xxfbh/201205/t20120517_155695.htm  亦或是其他格式程序都能识别
+   10. 新增扫描后台目录的功能  -dir  http://127.0.0.1 或者  -dir https://www.baidu.com/dire/
 
 这是一款基于python3的小巧的扫描工具
 
@@ -32,18 +36,18 @@ Usage:
     ![](https://raw.githubusercontent.com/spacesec/images/master/scan/scanHost.png) 
     
  2. 扫描一定范围内的存活主机  python scan.py -ah 123.125.115.1-255 -t 200
-    ![](https://raw.githubusercontent.com/spacesec/images/master/scan/7.png)
+    ![](https://raw.githubusercontent.com/spacesec/images/master/scan/8.png)
 	
  3. 扫描特定主机存活状态 scan.py -sh 127.0.0.1
     ![](https://raw.githubusercontent.com/spacesec/images/master/scan/scanSpecificHost.png)
  
- 4. 从文件中读取主机并扫描特定端口存活状态 python scan.py -r C:\Users\Ma\Desktop\Desk\info.txt -p 80 -t 200
+ 4. 从文件中读取主机并扫描特定端口存活状态 python scan.py -r D:\info.txt -t 200 -p 80
     ![扫描特定端口存活状态](https://raw.githubusercontent.com/spacesec/images/master/scan/5.png)
 
- 5. 从文件中读取主机并扫描全部端口存活状态 python scan.py -r "C:\Users\Ma\Desktop\1.txt" -t 200
+ 5. 从文件中读取主机并扫描全部端口存活状态 python scan.py -r D:\info.txt -t 200
     ![扫描全部端口存活状态](https://raw.githubusercontent.com/spacesec/images/master/scan/6.png)
 
- 6. 扫描一定范围内的存活主机并且保存至特定的输入出文件中  python scan.py -ah 10.86.65.1-255 -t 200 -p 80 -o result.txt
+ 6. 扫描一定范围内的存活主机并且保存至特定的输入出文件中   python scan.py -ah 123.125.115.1-255 -t 200 -o info.txt
     ![扫描结果并保存](https://raw.githubusercontent.com/spacesec/images/master/scan/1.png)
     ![生成的txt文件](https://raw.githubusercontent.com/spacesec/images/master/scan/2.png)
  
@@ -53,6 +57,14 @@ Usage:
     python scan.py -host "baidu.com"  
     python scan.py -host "127.0.0.1"
 ![自动识别主机](https://raw.githubusercontent.com/spacesec/images/master/scan/7.png)
+ 
+ 8. 扫描web后台可以访问的目录和文件[默认字典]  
+    python scan.py -dir http://127.0.0.1 -t 200
+    ![扫描后台可访问目录默认字典](https://raw.githubusercontent.com/spacesec/images/master/scan/9.png)
+ 
+ 9. 扫描web后台可以访问的目录和文件[用户自定义字典]  
+    python scan.py -dir http://127.0.0.1 -t 200 -add C:\Users\Ma\Desktop\1.txt
+    ![扫描后台可访问目录默认字典](https://raw.githubusercontent.com/spacesec/images/master/scan/10.png)
 
  
 
