@@ -16,9 +16,9 @@
 
 我已经将需要的模块封装好了,只需要下载即可使用
 
-您只需要输入python scan.py就可以并且得到如下结果:	
-Usage:
+您只需要输入python scan.py -help就可以并且得到如下结果:   
 
+       Usage:
        -host To scan the open ports of the Host
        -sh  Specific Host Detective                                        Example: -sh 127.0.0.1
        -ah  All alive Hosts Find all alive alive hosts                     Example: -ah 192.168.1.1-255
@@ -26,8 +26,9 @@ Usage:
        -r   Read hosts file                                                Example: -r "hosts.txt"
        -p   Port ping special ports,It was used to detective alive hosts   Example: -p="80,8080,443" default was 80 443
        -o   Output file address                                            Example: -o recoder.txt or -o D:\recoder.txt
+       -dir Scanning visible background directory                          Example: -dir http://127.0.0.1
+       -add Dictionary File Address                                        Example: -dir http://127.0.0.1  -add C:\dic.txt
        -help To show help information
-
 
 
 优     点:小巧,方便,强大
@@ -77,9 +78,9 @@ This is an powerful scanner based on python
 
 What you need to do is just download it and use it because have packaged all third-part modules
 
-What you need to do is just type python scan.py and then you can get the result as follows
- Usage:
-       
+What you need to do is just type python scan.py -help and then you can get the result as follows
+ 
+       Usage:
        -host To scan the open ports of the Host
        -sh  Specific Host Detective                                        Example: -sh 127.0.0.1
        -ah  All alive Hosts Find all alive alive hosts                     Example: -ah 192.168.1.1-255
@@ -87,6 +88,8 @@ What you need to do is just type python scan.py and then you can get the result 
        -r   Read hosts file                                                Example: -r "hosts.txt"
        -p   Port ping special ports,It was used to detective alive hosts   Example: -p="80,8080,443" default was 80 443
        -o   Output file address                                            Example: -o recoder.txt or -o D:\recoder.txt
+       -dir Scanning visible background directory                          Example: -dir http://127.0.0.1
+       -add Dictionary File Address                                        Example: -dir http://127.0.0.1  -add C:\dic.txt
        -help To show help information
 
 
@@ -117,3 +120,11 @@ Advantage:small but powerful
     python scan.py -host "baidu.com"  
     python scan.py -host "127.0.0.1"
 ![自动识别主机](https://raw.githubusercontent.com/spacesec/images/master/scan/7.png)
+
+ 8. Scan Web server Background Directory&Files[Default Dictionary]  
+    python scan.py -dir http://127.0.0.1 -t 200
+    ![扫描后台可访问目录默认字典](https://raw.githubusercontent.com/spacesec/images/master/scan/9.png)
+ 
+ 9. Scan Web server Background Directory&Files[Use user's Dictionary]  
+    python scan.py -dir http://127.0.0.1 -t 200 -add C:\Users\Ma\Desktop\1.txt
+    ![扫描后台可访问目录默认字典](https://raw.githubusercontent.com/spacesec/images/master/scan/10.png)
