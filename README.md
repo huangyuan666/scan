@@ -21,10 +21,10 @@
        Usage:
        -host To scan the open ports of the Host
        -sh  Specific Host Detective                                        Example: -sh 127.0.0.1
-       -ah  All alive Hosts Find all alive alive hosts                     Example: -ah 192.168.1.1-255
+       -ah  All alive Hosts .Find all alive hosts                          Example: -ah 192.168.1.1-255
        -t   Threads(1-200) Default is 80
        -r   Read hosts file                                                Example: -r "hosts.txt"
-       -p   Port ping special ports,It was used to detective alive hosts   Example: -p="80,8080,443" default was 80 443
+       -p   Port. Ping special ports,It was used to detective alive hosts  Example: -p="80,8080,443" default was 80 443
        -o   Output file address                                            Example: -o recoder.txt or -o D:\recoder.txt
        -dir Scanning visible background directory                          Example: -dir http://127.0.0.1
        -add Dictionary File Address                                        Example: -dir http://127.0.0.1  -add C:\dic.txt
@@ -83,10 +83,10 @@ What you need to do is just type python scan.py -help and then you can get the r
        Usage:
        -host To scan the open ports of the Host
        -sh  Specific Host Detective                                        Example: -sh 127.0.0.1
-       -ah  All alive Hosts Find all alive alive hosts                     Example: -ah 192.168.1.1-255
+       -ah  All alive Hosts. Find all alive hosts                     Example: -ah 192.168.1.1-255
        -t   Threads(1-200) Default is 80
        -r   Read hosts file                                                Example: -r "hosts.txt"
-       -p   Port ping special ports,It was used to detective alive hosts   Example: -p="80,8080,443" default was 80 443
+       -p   Port. Ping special ports,It was used to detective alive hosts   Example: -p="80,8080,443" default was 80 443
        -o   Output file address                                            Example: -o recoder.txt or -o D:\recoder.txt
        -dir Scanning visible background directory                          Example: -dir http://127.0.0.1
        -add Dictionary File Address                                        Example: -dir http://127.0.0.1  -add C:\dic.txt
