@@ -19,7 +19,7 @@
 
 您只需要输入python scan.py -help就可以并且得到如下结果:  
 
- Usage:
+      Usage:
        -host   To scan the open ports of the Host
        -sh     Specific Host Detective                                        Example: -sh 127.0.0.1
        -ah     All alive Hosts .Find all alive hosts                          Example: -ah 192.168.1.1-255
@@ -85,7 +85,7 @@ What you need to do is just download it and use it because have packaged all thi
 
 What you need to do is just type python scan.py -help and then you can get the result as follows
  
-   Usage:
+    Usage:
        -host   To scan the open ports of the Host
        -sh     Specific Host Detective                                        Example: -sh 127.0.0.1
        -ah     All alive Hosts .Find all alive hosts                          Example: -ah 192.168.1.1-255
