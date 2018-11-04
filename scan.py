@@ -1,12 +1,17 @@
 # -- coding: utf-8 --
 import threading, socket,time,os,re,sys,string
-from module import printc
-from module import queue
-from module import argparse
+from module import printc,butianInfo,queue,argparse
+# from module import queue
+# from module import argparse
 try:
     import requests
 except:
     msg1="[-] 您还没有安装requests依赖包,请使用 pip install requests安装"
+    printc.printf(msg1,'red')
+try:
+    import json
+except:
+    msg1="[-] 您还没有安装json依赖包,请使用 pip install json安装"
     printc.printf(msg1,'red')
 #扫描常用端口
 PortList=[21,22,23,25,31,42,53,67,68,69,79,80,81,85,99,102,109,135,137,138,139,143,161,389,443,445,456,
@@ -17,7 +22,7 @@ PortList=[21,22,23,25,31,42,53,67,68,69,79,80,81,85,99,102,109,135,137,138,139,1
 #判断主机是否存活的端口
 ports=[80,443]
 #后台不能访问的标志'404','NOT FOUND','护卫神','WAF','管理员','Forbidden','很抱歉',
-cantFlag=["WAF","页面不存在","404"]
+cantFlag=["WAF","页面不存在","404",'管理员','Forbidden','很抱歉',"服务器内部错误"]
 #线程个数
 nThread = 80
 #线程锁
@@ -103,21 +108,25 @@ class Tool():
         return any(char.isdigit() for char in inputString)
 
     #由于https://www.test.con http://baidu.com 使用程序是无法是别的,只有www.target.com这种才能被识别
-    #所以需要将一些非标准的转化为标准的形如www.target.com这样的
+    #所以需要将一些非标准的转化为标准的形如www.target.com这样的,ip地址也要转化为(/d+.)+\d类型的
     def standardUrl(self,url):
         pattern="([hwtps:/]{3,}[.\w-]+\.[a-z]+)"
+        ip_pattern="[\d+\.]+\d+"
         host=url
         flag = True 
-        if self.hasNum(host) ==True:
-            flag=False
-        if flag == True:   
+        # if self.hasNum(host) ==True:
+        #     flag=False
+        if re.findall(ip_pattern,url):
+            return re.findall(ip_pattern,url)[0]
+        else:
+        # if flag == True:   
             if re.search(pattern,url):
                 host=re.search(pattern,url)[1]
             for i in ["https://","http://"]:
                 host=host.replace(i,"")
             if "www." not in host:
                 host="www."+host
-        return host
+            return host
     #因为像将ip或者url输出位标准的    
     #读取文件每一行并将文件内容存放在列表中
     def content2List(self,add):
@@ -149,7 +158,7 @@ class Tool():
         if res1 or res2:
             return True
         else:
-            return False      
+            return False 
 
 class Logger(object):
     def __init__(self, fileN="Default.log"):
@@ -360,24 +369,29 @@ class ScanBackDirectory(threading.Thread):
         global Queue,lock
         tool=Tool()
         while not Queue.empty():
-            url=self.host+"/"+str(Queue.get())
-            res=requests.get(url)
-            status_code=res.status_code
-            content=str(res.content,"utf-8")
-            lock.acquire()
             try:
-                if tool.visible(status_code,content) == True:
-                    s1="[+]:"+url+" 存在"
-                    printc.printf(s1,"green")
-                    # print(threading.get_ident())#线程ID
-                    lock.release()
-                #     break
-                else:
-                    s2 = "[-]:" + url + " 不存在"
-                    printc.printf(s2, "red")
-                    # print(threading.get_ident())#线程ID
-                    lock.release()
+                url=self.host+"/"+str(Queue.get())
+                res=requests.get(url)
+                status_code=res.status_code
+                content=str(res.content,"utf-8")
+                lock.acquire()
+                try:
+                    if tool.visible(status_code,content) == True:
+                        s1="[+]:"+url+" 存在"
+                        printc.printf(s1,"green")
+                        # print(threading.get_ident())#线程ID
+                        lock.release()
+                    #     break
+                    else:
+                        s2 = "[-]:" + url + " 不存在"
+                        printc.printf(s2, "red")
+                        # print(threading.get_ident())#线程ID
+                        lock.release()
+                except:
+                    pass
             except:
+                msg1="[-]:连接中断正在重试中..."
+                printc.printf(msg1,'red')
                 pass
 
 
@@ -411,27 +425,31 @@ def menu():
     tool=Tool()
     address=""
     usage = """ 
-       -host To scan the open ports of the Host
-       -sh  Specific Host Detective                                        Example: -sh 127.0.0.1 
-       -ah  All alive Hosts .Find all alive hosts                          Example: -ah 192.168.1.1-255
-       -t   Threads(1-200) Default is 80
-       -r   Read hosts file                                                Example: -r "hosts.txt"
-       -p   Port. Ping special ports,It was used to detective alive hosts  Example: -p="80,8080,443" default was 80 443 
-       -o   Output file address                                            Example: -o recoder.txt or -o D:\\recoder.txt
-       -dir Scanning visible background directory                          Example: -dir http://127.0.0.1
-       -add Dictionary File Address                                        Example: -dir http://127.0.0.1  -add C:\dic.txt
+       -host   To scan the open ports of the Host
+       -sh     Specific Host Detective                                        Example: -sh 127.0.0.1 
+       -ah     All alive Hosts .Find all alive hosts                          Example: -ah 192.168.1.1-255
+       -t      Threads(1-200) Default is 80
+       -r      Read hosts file                                                Example: -r "hosts.txt"
+       -p      Port. Ping special ports,It was used to detective alive hosts  Example: -p="80,8080,443" default was 80 443 
+       -o      Output file address                                            Example: -o recoder.txt or -o D:\\recoder.txt
+       -dir    Scanning visible background directory                          Example: -dir http://127.0.0.1
+       -add    Dictionary File Address                                        Example: -dir http://127.0.0.1  -add C:\dic.txt
+       -url    Butian SRC list url                                            Example: -url https://butian.360.cn/Home/Active/company -page 10
+       -page   Butian SRC Pages      Default is 10                            Example: -url https://butian.360.cn/Home/Active/company -page 10
        -help To show help information
     """
     parser = argparse.ArgumentParser()
     parser.add_argument('-host', dest='host', help='-h To scan the open ports of the Host')
     parser.add_argument('-sh', dest='sh', help='Specific Host Detective                                        Example: -sh 127.0.0.1 ')
-    parser.add_argument('-ah', dest='ah', help='All alive Hosts .Find all alive hosts                     Example: -ah 192.168.1.1-255')
+    parser.add_argument('-ah', dest='ah', help='All alive Hosts .Find all alive hosts                          Example: -ah 192.168.1.1-255')
     parser.add_argument('-t', dest='t', help='Threads(1-200) Default is 80')
-    parser.add_argument('-r', dest='r', help='Read hosts file                                                Example: -r "hosts.txt"')
-    parser.add_argument('-p', dest='p', help='Port.Ping special ports,It was used to detective alive hosts   Example: -p="80,8080,443" default was 80 443')
-    parser.add_argument('-o', dest='o', help='Output file address                                            Example: -o recoder.txt or -o D:\\recoder.txt')
-    parser.add_argument('-dir', dest='dir', help='Scanning visible background directory                          Example: -dir http://127.0.0.1' )
-    parser.add_argument('-add', dest='add', help='Dictionary File Address                                        Example: -dir http://127.0.0.1  -add C:\dic.txt' )
+    parser.add_argument('-r', dest='r', help='Read hosts file                                                  Example: -r "hosts.txt"')
+    parser.add_argument('-p', dest='p', help='Port.Ping special ports,It was used to detective alive hosts     Example: -p="80,8080,443" default was 80 443')
+    parser.add_argument('-o', dest='o', help='Output file address                                              Example: -o recoder.txt or -o D:\\recoder.txt')
+    parser.add_argument('-dir', dest='dir', help='Scanning visible background directory                        Example: -dir http://127.0.0.1' )
+    parser.add_argument('-add', dest='add', help='Dictionary File Address                                      Example: -dir http://127.0.0.1  -add C:\dic.txt' )
+    parser.add_argument('-url', dest='url', help='Butian SRC list url                                          Example: -url https://butian.360.cn/Home/Active/company' )
+    parser.add_argument('-page', dest='page', help='Butian SRC Pages      Default is 10                        Example: -url https://butian.360.cn/Home/Active/company' )
     parser.add_argument('-help', action="store_true", help='To show help information')
     options = parser.parse_args()
     if options.host:
@@ -521,21 +539,36 @@ def menu():
             tool.printIfExist(address)
         else:        
          printc.printf("\n[-] 请在您输入的地址前面添加http或者https。http://127.0.0.1 或者 https://www.baidu.com 格式的地址",'yellow')
+    elif options.url:
+        url=options.url
+        if options.o:
+            address=tool.address(options.o)   
+            tool.output(address)
+        if options.page:
+            page=options.page
+        else:
+            # url="https://butian.360.cn/Home/Active/company"
+            # page=10
+            page=10
+        butianInfo.get_src_name(url,page)
+        tool.printIfExist(address)
     
     if options.help:
               helpInfo()
 
 def helpInfo():
     helpInformaiton = """Usage:
-       -host To scan the open ports of the Host
-       -sh  Specific Host Detective                                        Example: -sh 127.0.0.1 
-       -ah  All alive Hosts .Find all alive hosts                          Example: -ah 192.168.1.1-255
-       -t   Threads(1-200) Default is 80
-       -r   Read hosts file                                                Example: -r "hosts.txt"
-       -p   Port. Ping special ports,It was used to detective alive hosts  Example: -p="80,8080,443" default was 80 443 
-       -o   Output file address                                            Example: -o recoder.txt or -o D:\\recoder.txt
-       -dir Scanning visible background directory                          Example: -dir http://127.0.0.1
-       -add Dictionary File Address                                        Example: -dir http://127.0.0.1  -add C:\dic.txt
+       -host   To scan the open ports of the Host
+       -sh     Specific Host Detective                                        Example: -sh 127.0.0.1 
+       -ah     All alive Hosts .Find all alive hosts                          Example: -ah 192.168.1.1-255
+       -t      Threads(1-200) Default is 80
+       -r      Read hosts file                                                Example: -r "hosts.txt"
+       -p      Port. Ping special ports,It was used to detective alive hosts  Example: -p="80,8080,443" default was 80 443 
+       -o      Output file address                                            Example: -o recoder.txt or -o D:\\recoder.txt
+       -dir    Scanning visible background directory                          Example: -dir http://127.0.0.1
+       -add    Dictionary File Address                                        Example: -dir http://127.0.0.1  -add C:\dic.txt
+       -url    Butian SRC list url                                            Example: -url https://butian.360.cn/Home/Active/company -page 10
+       -page   Butian SRC Pages      Default is 10                            Example: -url https://butian.360.cn/Home/Active/company -page 10
        -help To show help information
         """
     printc.printf(helpInformaiton,"yellow")

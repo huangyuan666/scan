@@ -11,24 +11,26 @@
    8. 改变之前的线程设置策略,线程设置由原来的1-100(默认30)改变为1-200(默认80)扫描速度更快
    9. 改善规则,改变之前只能输入标准主机的限定如: -host www.target.com 现在您只需要输入 -host target.com 亦或是 http://www.target.cn/xxgkw/xxfbh/201205/t20120517_155695.htm  亦或是其他格式程序都能识别
    10. 新增扫描后台目录的功能  -dir  http://127.0.0.1 或者  -dir https://www.baidu.com/dire/
+   11. 新增-url 和-page参数,自动化获取补天公益SRC厂商名单并且可保存生成txt文件
 
 这是一款基于python3的小巧的扫描工具
 
 我已经将需要的模块封装好了,只需要下载即可使用
 
-您只需要输入python scan.py -help就可以并且得到如下结果:   
+您只需要输入python scan.py -help就可以并且得到如下结果:  
 
-       Usage:
-       -host To scan the open ports of the Host
-       -sh  Specific Host Detective                                        Example: -sh 127.0.0.1
-       -ah  All alive Hosts .Find all alive hosts                          Example: -ah 192.168.1.1-255
-       -t   Threads(1-200) Default is 80
-       -r   Read hosts file                                                Example: -r "hosts.txt"
-       -p   Port. Ping special ports,It was used to detective alive hosts  Example: -p="80,8080,443" default was 80 443
-       -o   Output file address                                            Example: -o recoder.txt or -o D:\recoder.txt
-       -dir Scanning visible background directory                          Example: -dir http://127.0.0.1
-       -add Dictionary File Address                                        Example: -dir http://127.0.0.1  -add C:\dic.txt
-       -help To show help information
+ Usage:
+       -host   To scan the open ports of the Host
+       -sh     Specific Host Detective                                        Example: -sh 127.0.0.1
+       -ah     All alive Hosts .Find all alive hosts                          Example: -ah 192.168.1.1-255
+       -t      Threads(1-200) Default is 80
+       -r      Read hosts file                                                Example: -r "hosts.txt"
+       -p      Port. Ping special ports,It was used to detective alive hosts  Example: -p="80,8080,443" default was 80 443
+       -o      Output file address                                            Example: -o recoder.txt or -o D:\recoder.txt
+       -dir    Scanning visible background directory                          Example: -dir http://127.0.0.1
+       -add    Dictionary File Address                                        Example: -dir http://127.0.0.1  -add C:\dic.txt
+       -url    Butian SRC list url                                            Example: -url https://butian.360.cn/Home/Active/company -page 10
+       -page   Butian SRC Pages      Default is 10                            Example: -url https://butian.360.cn/Home/Active/company -page 10
 
 
 优     点:小巧,方便,强大
@@ -67,6 +69,9 @@
     python scan.py -dir http://127.0.0.1 -t 200 -add C:\Users\Ma\Desktop\1.txt
     ![扫描后台可访问目录默认字典](https://raw.githubusercontent.com/spacesec/images/master/scan/10.png)
 
+ 10. 获取补天公益SRC名单保存为txt文件 python scan.py  -url  https://butian.360.cn/Home/Active/company -page 10 -o 补天名单.txt
+     ![补天公益SRC保存为txt文件](https://raw.githubusercontent.com/spacesec/images/master/scan/11.png)
+
  
 
 ******************************************************************************
@@ -80,17 +85,18 @@ What you need to do is just download it and use it because have packaged all thi
 
 What you need to do is just type python scan.py -help and then you can get the result as follows
  
-       Usage:
-       -host To scan the open ports of the Host
-       -sh  Specific Host Detective                                        Example: -sh 127.0.0.1
-       -ah  All alive Hosts. Find all alive hosts                     Example: -ah 192.168.1.1-255
-       -t   Threads(1-200) Default is 80
-       -r   Read hosts file                                                Example: -r "hosts.txt"
-       -p   Port. Ping special ports,It was used to detective alive hosts   Example: -p="80,8080,443" default was 80 443
-       -o   Output file address                                            Example: -o recoder.txt or -o D:\recoder.txt
-       -dir Scanning visible background directory                          Example: -dir http://127.0.0.1
-       -add Dictionary File Address                                        Example: -dir http://127.0.0.1  -add C:\dic.txt
-       -help To show help information
+   Usage:
+       -host   To scan the open ports of the Host
+       -sh     Specific Host Detective                                        Example: -sh 127.0.0.1
+       -ah     All alive Hosts .Find all alive hosts                          Example: -ah 192.168.1.1-255
+       -t      Threads(1-200) Default is 80
+       -r      Read hosts file                                                Example: -r "hosts.txt"
+       -p      Port. Ping special ports,It was used to detective alive hosts  Example: -p="80,8080,443" default was 80 443
+       -o      Output file address                                            Example: -o recoder.txt or -o D:\recoder.txt
+       -dir    Scanning visible background directory                          Example: -dir http://127.0.0.1
+       -add    Dictionary File Address                                        Example: -dir http://127.0.0.1  -add C:\dic.txt
+       -url    Butian SRC list url                                            Example: -url https://butian.360.cn/Home/Active/company -page 10
+       -page   Butian SRC Pages      Default is 10                            Example: -url https://butian.360.cn/Home/Active/company -page 10
 
 
 Advantage:small but powerful 
