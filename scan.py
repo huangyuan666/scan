@@ -22,7 +22,7 @@ PortList=[21,22,23,25,31,42,53,67,68,69,79,80,81,85,99,102,109,135,137,138,139,1
 #判断主机是否存活的端口
 ports=[80,443]
 #后台不能访问的标志'404','NOT FOUND','护卫神','WAF','管理员','Forbidden','很抱歉',
-cantFlag=["WAF","页面不存在","404",'管理员','Forbidden','很抱歉',"服务器内部错误","服务器错误","您要查找的资源可能已被删除，已更改名称或者暂时不可用。"]
+cantFlag=["WAF","页面不存在","404",'管理员','Forbidden','很抱歉',"服务器内部错误","服务器错误","您要查找的资源可能已被删除，已更改名称或者暂时不可用。","无法访问"]
 #线程个数
 nThread = 80
 #线程锁
@@ -41,6 +41,7 @@ flag = 1
 #全局队列
 Queue=''
 #得到一个队列
+response=''
 def GetQueue(list):
     PortQueue = queue.Queue(65535)
     for p in list:
@@ -49,7 +50,7 @@ def GetQueue(list):
 #这是一个工具类,里面放着一些常见的工具函数
 
 class Tool():
-    global ports,PortList
+    global ports,PortList,response
     #判断用户输入的线程数
     def nThreads(self,num):
         global nThread
@@ -144,18 +145,21 @@ class Tool():
         else:
             res.encoding="utf-8"
             content=str(res.text)
-        flag=True
-        global cantFlag
-        if res.status_code ==200:
-            if res.is_redirect==False:
-                for i in cantFlag:
-                    if  i  in content:
-                        flag=False
-                return flag
+        if content==response:
+            return False
+        else:
+            flag=True
+            global cantFlag
+            if res.status_code ==200:
+                if res.is_redirect==False:
+                    for i in cantFlag:
+                        if  i  in content:
+                            flag=False
+                    return flag
+                else:
+                    return False
             else:
                 return False
-        else:
-            return False
     #判断用户输入是否是标准的http://127.0.0.1 或者https://www.baidu.com
     def isStandard(self,inputString):
         p1="([htps:/]+[.\w-]+\.[a-z]+)" #匹配标准的https://www.baidu.com格式
@@ -438,7 +442,7 @@ def scanDir(host,add):
     #     pass
 
 def menu():
-    global nThread,ports,PortList
+    global nThread,ports,PortList,response
     tool=Tool()
     address=""
     usage = """ 
@@ -547,6 +551,9 @@ def menu():
 
         host=options.dir
         if  tool.isStandard(host) ==True:
+            res=tool.Requests(host)
+            res.encoding="utf-8"
+            response=res.text
             #dirList=tool.content2List()
             if options.add:
                 add=options.add
