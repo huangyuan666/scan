@@ -22,7 +22,7 @@ PortList=[21,22,23,25,31,42,53,67,68,69,79,80,81,85,99,102,109,135,137,138,139,1
 #判断主机是否存活的端口
 ports=[80,443]
 #后台不能访问的标志'404','NOT FOUND','护卫神','WAF','管理员','Forbidden','很抱歉',
-cantFlag=["WAF","页面不存在","404",'管理员','Forbidden','很抱歉',"服务器内部错误","服务器错误","您要查找的资源可能已被删除，已更改名称或者暂时不可用。","无法访问"]
+cantFlag=["WAF","页面不存在","404",'管理员','Forbidden','很抱歉',"服务器内部错误","服务器错误","您要查找的资源可能已","无法访问"]
 #线程个数
 nThread = 80
 #线程锁
@@ -40,17 +40,17 @@ threads=[]
 flag = 1
 #全局队列
 Queue=''
-#得到一个队列
 response=''
-def GetQueue(list):
-    PortQueue = queue.Queue(65535)
-    for p in list:
-        PortQueue.put(p)
-    return PortQueue
 #这是一个工具类,里面放着一些常见的工具函数
 
 class Tool():
     global ports,PortList,response
+#得到一个队列
+    def GetQueue(self,list):
+        PortQueue = queue.Queue(65535)
+        for p in list:
+            PortQueue.put(p)
+        return PortQueue
     #判断用户输入的线程数
     def nThreads(self,num):
         global nThread
@@ -70,13 +70,14 @@ class Tool():
         return list1
     #扫描从hosts.txt文件中读取出来的主机存活端口信息    
     def scan_host_ports(self,ip):
+        tool=Tool()
         s1 =  '[*] Scanning:{ip}'.format(ip=ip)
         printc.printf(s1, "skyblue")
         start_time = time.time()
         global nThread, PortList
         ThreadList = []
         strIP = ip
-        SingleQueue = GetQueue(PortList)
+        SingleQueue = tool.GetQueue(PortList)
         for i in range(0, nThread):
             t = ScanThreadSingle(strIP, SingleQueue)
             ThreadList.append(t)
@@ -138,13 +139,17 @@ class Tool():
         for line in f.readlines():
             dirList.append(str(line)[2:-5])
         return dirList
-    #根据响应的结果判断是否可以访问
-    def visible(self,res):
+    #判断向相应的结果编码是否是utf-8如果不是将其转化为utf-8
+    def set2utf8cont(self,res):
         if res.encoding=="utf-8":
             content=str(res.text)
+            return content
         else:
             res.encoding="utf-8"
-            content=str(res.text)
+            return str(res.text)
+    #根据响应的结果判断是否可以访问
+    def visible(self,res):
+        content=self.set2utf8cont(res)
         if content==response:
             return False
         else:
@@ -162,7 +167,7 @@ class Tool():
                 return False
     #判断用户输入是否是标准的http://127.0.0.1 或者https://www.baidu.com
     def isStandard(self,inputString):
-        p1="([htps:/]+[.\w-]+\.[a-z]+)" #匹配标准的https://www.baidu.com格式
+        p1="^[htps:/]+[.\w-]+\.[a-z]+" #匹配标准的https://www.baidu.com格式
         p2="[htps.:/]+(\d+\.){3}\d"  #匹配形如http://127.0.0.1格式
         res1=re.findall(p1,inputString)
         res2=re.findall(p2,inputString)
@@ -181,7 +186,10 @@ class Tool():
         except:
             pass
 
-
+    #将list打印出来
+    def printList(self,list,color):
+        for i in list:
+            printc.printf(i,color)
 
 class Logger(object):
     def __init__(self, fileN="Default.log"):
@@ -285,11 +293,12 @@ class scanHosts(ScanThread):
             
 #扫描端口
 def scan_host_ports(ip):
+    tool=Tool()
     start_time = time.time()
     global nThread, PortList
     ThreadList = []
     strIP = ip
-    SingleQueue = GetQueue(PortList)
+    SingleQueue = tool.GetQueue(PortList)
     for i in range(0, nThread):
         t = ScanThreadSingle(strIP, SingleQueue)
         ThreadList.append(t)
@@ -321,6 +330,7 @@ def scan_specific_hosts(ip_addr,port):
 #发现所有存活主机
 def scan_all_hosts(ip_add):
     global openNum,nThread
+    tool=Tool()
     ip_add=ip_add.replace("-",".")
     ip_add=ip_add.split(".")
     l=ip_add[3]
@@ -332,7 +342,7 @@ def scan_all_hosts(ip_add):
     strIP = ip_add
     for i in range(int(l),int(r)):
         hostLists.append(str(ip_pre)+str(i))
-    SingleQueue = GetQueue(hostLists)
+    SingleQueue = tool.GetQueue(hostLists)
     for i in range(0, nThread):
         t = scanHosts(ip_pre, SingleQueue)
         ThreadList.append(t)
@@ -361,12 +371,12 @@ def scan_all_hosts_from_file(hosts_file_add):
         hostLists=[]#存放扫描范围的主机
         hostLists= hosts_content  #lines
         if len(PortList)>2:
-            SingleQueue = GetQueue(hostLists)
+            SingleQueue = tool.GetQueue(hostLists)
             while not SingleQueue.empty():
                 ip = SingleQueue.get()
                 tool.scan_host_ports(ip)
         else:
-            SingleQueue = GetQueue(hostLists)
+            SingleQueue = tool.GetQueue(hostLists)
             for i in range(0, nThread):
                 t = scanHosts(0, SingleQueue)
                 ThreadList.append(t)
@@ -389,7 +399,7 @@ class ScanBackDirectory(threading.Thread):
         threading.Thread.__init__(self)
         self.host=host
     def run(self):
-        global Queue,lock
+        global Queue,lock,OpenHost
         tool=Tool()
         while not Queue.empty():
             try:
@@ -402,6 +412,7 @@ class ScanBackDirectory(threading.Thread):
                         printc.printf(s1,"green")
                         # print(threading.get_ident())#线程ID
                         lock.release()
+                        OpenHost.append(s1)
                     #     break
                     else:
                         s2 = "[-]:" + url + " 不存在"
@@ -426,7 +437,7 @@ def scanDir(host,add):
     #dirlists=tool.content2List("D:\Github\scan\dict\directory.txt")
     dirlists=tool.content2List(add)
     # print(str(dirlists))
-    Queue = GetQueue(dirlists)  
+    Queue = tool.GetQueue(dirlists)  
     for i in range(0, nThread):
         t = ScanBackDirectory(host)
         ThreadList.append(t)
@@ -434,6 +445,10 @@ def scanDir(host,add):
         t.start()
     for t in ThreadList:
         t.join()
+    if OpenHost:    
+        msg1="***********可访问的url有:******************"
+        printc.printf(msg1,'yellow')
+        tool.printList(OpenHost,"green")    
     s1 = '[*] The scanning is finished'
     s2 = '[*] Time cost :' + str((time.time() - start_time)) + ' s'
     printc.printf(s1, "skyblue")
@@ -552,8 +567,7 @@ def menu():
         host=options.dir
         if  tool.isStandard(host) ==True:
             res=tool.Requests(host)
-            res.encoding="utf-8"
-            response=res.text
+            response=tool.set2utf8cont(res)
             #dirList=tool.content2List()
             if options.add:
                 add=options.add
