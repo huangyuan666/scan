@@ -6,12 +6,12 @@ from module import printc,butianInfo,queue,argparse
 try:
     import requests
 except:
-    msg1="[-] 您还没有安装requests依赖包,请使用 pip install requests安装"
+    msg1="[-] 检测到您还没有安装Python3的requests依赖包,请使用 pip install requests安装"
     printc.printf(msg1,'red')
 try:
     import json
 except:
-    msg1="[-] 您还没有安装json依赖包,请使用 pip install json安装"
+    msg1="[-] 检测到您还没有安装Python3的json依赖包,请使用 pip install json安装"
     printc.printf(msg1,'red')
 #扫描常用端口
 PortList=[21,22,23,25,31,42,53,67,68,69,79,80,81,85,99,102,109,135,137,138,139,143,161,389,443,445,456,
@@ -22,7 +22,7 @@ PortList=[21,22,23,25,31,42,53,67,68,69,79,80,81,85,99,102,109,135,137,138,139,1
 #判断主机是否存活的端口
 ports=[80,443]
 #后台不能访问的标志'404','NOT FOUND','护卫神','WAF','管理员','Forbidden','很抱歉',
-cantFlag=["WAF","页面不存在","404",'管理员','Forbidden','很抱歉',"服务器内部错误"]
+cantFlag=["WAF","页面不存在","404",'管理员','Forbidden','很抱歉',"服务器内部错误","服务器错误","您要查找的资源可能已被删除，已更改名称或者暂时不可用。"]
 #线程个数
 nThread = 80
 #线程锁
@@ -137,16 +137,23 @@ class Tool():
         for line in f.readlines():
             dirList.append(str(line)[2:-5])
         return dirList
-    #根据响应的status_code 和content判断是否可访问
-    def visible(self,status,content):
-        content=str(content)
+    #根据响应的结果判断是否可以访问
+    def visible(self,res):
+        if res.encoding=="utf-8":
+            content=str(res.text)
+        else:
+            res.encoding="utf-8"
+            content=str(res.text)
         flag=True
         global cantFlag
-        if status ==200:
-            for i in cantFlag:
-                if  i  in content:
-                    flag=False
-            return flag
+        if res.status_code ==200:
+            if res.is_redirect==False:
+                for i in cantFlag:
+                    if  i  in content:
+                        flag=False
+                return flag
+            else:
+                return False
         else:
             return False
     #判断用户输入是否是标准的http://127.0.0.1 或者https://www.baidu.com
@@ -158,7 +165,19 @@ class Tool():
         if res1 or res2:
             return True
         else:
-            return False 
+            return False
+    #由于https和http响应结果的不同,所以要对其进行分类     
+    def Requests(self,url):
+        try:
+            requests.packages.urllib3.disable_warnings()
+            if "https" in str(url):
+                return requests.get(url,verify=False)
+            else:
+                return requests.get(url)
+        except:
+            pass
+
+
 
 class Logger(object):
     def __init__(self, fileN="Default.log"):
@@ -371,12 +390,10 @@ class ScanBackDirectory(threading.Thread):
         while not Queue.empty():
             try:
                 url=self.host+"/"+str(Queue.get())
-                res=requests.get(url)
-                status_code=res.status_code
-                content=str(res.content,"utf-8")
+                res=tool.Requests(url)
                 lock.acquire()
                 try:
-                    if tool.visible(status_code,content) == True:
+                    if tool.visible(res) == True:
                         s1="[+]:"+url+" 存在"
                         printc.printf(s1,"green")
                         # print(threading.get_ident())#线程ID
@@ -388,7 +405,7 @@ class ScanBackDirectory(threading.Thread):
                         # print(threading.get_ident())#线程ID
                         lock.release()
                 except:
-                    pass
+                      pass
             except:
                 msg1="[-]:连接中断正在重试中..."
                 printc.printf(msg1,'red')
