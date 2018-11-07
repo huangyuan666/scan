@@ -113,21 +113,26 @@ class Tool():
     #所以需要将一些非标准的转化为标准的形如www.target.com这样的,ip地址也要转化为(/d+.)+\d类型的
     def standardUrl(self,url):
         pattern="([hwtps:/]{3,}[.\w-]+\.[a-z]+)"
-        ip_pattern="[\d+\.]+\d+"
+        ip_pattern="\d+\.\d+\.\d+\.\d+"
         host=url
         flag = True 
         # if self.hasNum(host) ==True:
         #     flag=False
         if re.findall(ip_pattern,url):
+            host=re.findall(ip_pattern,url)[0]
+            info="[+] Starting scanning:"+str(host)
+            printc.printf(info,'green')
             return re.findall(ip_pattern,url)[0]
         else:
         # if flag == True:   
-            if re.search(pattern,url):
-                host=re.search(pattern,url)[1]
+            if re.findall(pattern,url):
+                host=re.findall(pattern,url)[0]
             for i in ["https://","http://"]:
                 host=host.replace(i,"")
             if "www." not in host:
                 host="www."+host
+                info="[+] Starting scanning:"+str(host)
+                printc.printf(info,'green')
             return host
     #因为像将ip或者url输出位标准的    
     #读取文件每一行并将文件内容存放在列表中
@@ -168,7 +173,7 @@ class Tool():
     #判断用户输入是否是标准的http://127.0.0.1 或者https://www.baidu.com
     def isStandard(self,inputString):
         p1="^[htps:/]+[.\w-]+\.[a-z]+" #匹配标准的https://www.baidu.com格式
-        p2="[htps.:/]+(\d+\.){3}\d"  #匹配形如http://127.0.0.1格式
+        p2="[htps.:/]+(\d+\.){3}\d+"  #匹配形如http://127.0.0.1格式
         res1=re.findall(p1,inputString)
         res2=re.findall(p2,inputString)
         if res1 or res2:
