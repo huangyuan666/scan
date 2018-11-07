@@ -120,8 +120,6 @@ class Tool():
         #     flag=False
         if re.findall(ip_pattern,url):
             host=re.findall(ip_pattern,url)[0]
-            info="[+] Starting scanning:"+str(host)
-            printc.printf(info,'green')
             return re.findall(ip_pattern,url)[0]
         else:
         # if flag == True:   
@@ -131,8 +129,6 @@ class Tool():
                 host=host.replace(i,"")
             if "www." not in host:
                 host="www."+host
-                info="[+] Starting scanning:"+str(host)
-                printc.printf(info,'green')
             return host
     #因为像将ip或者url输出位标准的    
     #读取文件每一行并将文件内容存放在列表中
@@ -507,6 +503,8 @@ def menu():
             msg2="[*] Scanning Ports :"+msg1
             printc.printf(msg2,"skyblue")
         s = tool.standardUrl(options.host)
+        info="[+]Starting scanning:"+str(s)
+        printc.printf(info,'yellow')
         scan_host_ports(s)
         tool.printIfExist(address)
     elif options.ah :
