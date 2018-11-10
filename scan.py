@@ -2,18 +2,8 @@
 import threading, socket,time,os,re,sys,string
 from module import printc,butianInfo,queue,argparse
 from module import tool as tools
-# from module import queue
-# from module import argparse
-try:
-    import requests
-except:
-    msg1="[-] 检测到您还没有安装Python3的requests依赖包,请使用 pip install requests安装"
-    printc.printf(msg1,'red')
-try:
-    import json
-except:
-    msg1="[-] 检测到您还没有安装Python3的json依赖包,请使用 pip install json安装"
-    printc.printf(msg1,'red')
+tools.importModules() #导入所需的依赖包,如果用户没有安装提示用户安装
+
 #扫描常用端口
 PortList=[21,22,23,25,31,42,53,67,68,69,79,80,81,85,99,102,109,135,137,138,139,143,161,389,443,445,456,
 513,554,593,635,636,646,873,902,903,912,913,993,1000,1001,1029,1011,1024,1043,1044,1080,1170,1234,1245,1433,1502,1536,
