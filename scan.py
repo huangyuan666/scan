@@ -1,6 +1,7 @@
 # -- coding: utf-8 --
 import threading, socket,time,os,re,sys,string
 from module import printc,butianInfo,queue,argparse
+from module import tool as tools
 # from module import queue
 # from module import argparse
 try:
@@ -22,7 +23,7 @@ PortList=[21,22,23,25,31,42,53,67,68,69,79,80,81,85,99,102,109,135,137,138,139,1
 #判断主机是否存活的端口
 ports=[80,443]
 #后台不能访问的标志'404','NOT FOUND','护卫神','WAF','管理员','Forbidden','很抱歉',
-cantFlag=["WAF","页面不存在","404",'管理员','Forbidden','很抱歉',"服务器内部错误","服务器错误","您要查找的资源可能已","无法访问"]
+cantFlag=["WAF","页面不存在","404",'管理员','Forbidden','很抱歉',"服务器内部错误","服务器错误","您要查找的资源可能已","您无权访问此页","无法访问"]
 #线程个数
 nThread = 80
 #线程锁
@@ -503,7 +504,8 @@ def menu():
             msg2="[*] Scanning Ports :"+msg1
             printc.printf(msg2,"skyblue")
         s = tool.standardUrl(options.host)
-        info="[+]Starting scanning:"+str(s)
+        ip= tools.getIPByName(s)
+        info="[+]Starting scanning:"+str(s)+"({ip})".format(ip=ip)
         printc.printf(info,'yellow')
         scan_host_ports(s)
         tool.printIfExist(address)

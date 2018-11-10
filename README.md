@@ -19,6 +19,8 @@
    9. 改善规则,改变之前只能输入标准主机的限定如: -host www.target.com 现在您只需要输入 -host target.com 亦或是 http://www.target.cn/xxgkw/xxfbh/201205/t20120517_155695.htm  亦或是其他格式程序都能识别
    10. 新增扫描后台目录的功能  -dir  http://127.0.0.1 或者  -dir https://www.baidu.com/dire/
    11. 新增-url 和-page参数,自动化获取补天公益SRC厂商名单并且可保存生成txt文件
+   12. 新增ip显示,例如您输入python scan.py -host http://www.baidu.com/ 程序会自动打印主机的ip地址方便您进一步操作
+   13. 程序将变得模块化,例如以后的功能函数会写在modules目录下的文件里面,如tool.py里面放的全部是功能函数,功能函数的代码不会在出现在scan.py主文件里面
 
 这是一款基于python3的小巧的扫描工具
 
