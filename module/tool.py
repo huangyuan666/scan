@@ -19,4 +19,8 @@ def importModules():
 
 #通过域名获取ip
 def getIPByName(host):
-    return socket.gethostbyname(host)
+    try:
+        return socket.gethostbyname(host)
+    except:
+        return 0
+        pass
