@@ -14,7 +14,7 @@
    4. 新增全局 -o 参数,您可以保存存任意输出的结果
    5. 改变 -r 参数功能使其既可以采用默认方式扫描全部开放端口,也可以扫描特定的端口开放情况
    6. 新增正则表达式,意味着您在让程序读取文件时不用对文件做任何处理(即便里面有中文或者其他无用信息),程序会自动筛选有效信息
-   7. 新增全局 -p 参数,用户可以自己设定扫描端口
+   7. 新增全局 -p 参数,用户可以自己设定扫描端口,也可以扫描一定范围内的扫描
    8. 改变之前的线程设置策略,线程设置由原来的1-100(默认30)改变为1-200(默认80)扫描速度更快
    9. 改善规则,改变之前只能输入标准主机的限定如: -host www.target.com 现在您只需要输入 -host target.com 亦或是 http://www.target.cn/xxgkw/xxfbh/201205/t20120517_155695.htm  亦或是其他格式程序都能识别
    10. 新增扫描后台目录的功能  -dir  http://127.0.0.1 或者  -dir https://www.baidu.com/dire/
@@ -29,17 +29,18 @@
 您只需要输入python scan.py -help就可以并且得到如下结果:  
 
       Usage:
-       -host   To scan the open ports of the Host
-       -sh     Specific Host Detective                                        Example: -sh 127.0.0.1
-       -ah     All alive Hosts .Find all alive hosts                          Example: -ah 192.168.1.1-255
+       -host   To scan the open ports of the Host                             Default scanning ports are the most usual ports
+       -sh     Specific Host Detective                                        Example: -sh 127.0.0.1 
+       -ah     All alive Hosts .Find all alive hosts                          Example: -ah 192.168.1.1-255 Default ports is 80 443
        -t      Threads(1-200) Default is 80
        -r      Read hosts file                                                Example: -r "hosts.txt"
-       -p      Port. Ping special ports,It was used to detective alive hosts  Example: -p="80,8080,443" default was 80 443
-       -o      Output file address                                            Example: -o recoder.txt or -o D:\recoder.txt
+       -p      Ports                                                          Example: -p="80,8080,443" or -p 1-255 default are most usual ports
+       -o      Output file address                                            Example: -o recoder.txt or -o D:\\recoder.txt
        -dir    Scanning visible background directory                          Example: -dir http://127.0.0.1
        -add    Dictionary File Address                                        Example: -dir http://127.0.0.1  -add C:\dic.txt
        -url    Butian SRC list url                                            Example: -url https://butian.360.cn/Home/Active/company -page 10
        -page   Butian SRC Pages      Default is 10                            Example: -url https://butian.360.cn/Home/Active/company -page 10
+       -help To show help information
 
 
 优     点:小巧,方便,强大

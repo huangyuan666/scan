@@ -8,11 +8,13 @@ wlcsystem/wlcsystem
 wlpisystem/wlpisystem
 Author
 AuthorDistil.aspx
+logon_pro.jsp
 admin.asp
 ad_login.asp
 ad_manage.asp
 add_admin.asp
 addmember.asp
+etaxLoan.jsp
 adduser.asp
 adm_login.asp
 admin/admin.asp
@@ -668,3 +670,8 @@ wwwlog.jsp
 ../admin/manage.jsp
 wp-admin
 admin-ajax.php
+get
+js
+icon
+inc
+manual

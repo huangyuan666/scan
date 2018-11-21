@@ -16,8 +16,8 @@ except:
 PortList=[21,22,23,25,31,42,53,67,68,69,79,80,81,85,99,102,109,135,137,138,139,143,161,389,443,445,456,
 513,554,593,635,636,646,873,902,903,912,913,993,1000,1001,1029,1011,1024,1043,1044,1080,1170,1234,1245,1433,1502,1536,
 1537,1538,1539,1540,1542,1543,1544,1547,1548,1549,1801,1935,2066,2500,2504,2601,2602,2604,2869,3306,3389,3443,4000,4444,
-4224,4444,4900,5040,5357,6000,6942,7680,7702,7720,7739,7777,7778,7779,7780,7807,7831,7833,8080,8085,8088,8888,8307,8443,8800,9015,9075,9081,9086,
-9087,9095,9144,9156,9666,9999,12051,13223,14367,14601,14610,14611,14612,14613,14614,14615,14616,14617,14618,14619,14620,14621,21440,21441,28317,35432,62078,63342,65000]
+4224,4444,4900,5040,5357,5554,6000,6942,70004,7005,7006,7007,7680,7702,7720,7739,7777,7778,7779,7780,7807,7831,7833,8080,8085,8088,8161,8888,8307,8443,8800,8889,9015,9075,9081,9086,
+9087,9095,9144,9156,9666,9999,12051,13223,14367,14601,14610,14611,14612,14613,14614,14615,14616,14617,14618,14619,14620,14621,21440,21441,28317,35432,48620,62078,63342,65000]
 #判断主机是否存活的端口
 ports=[80,443]
 #后台不能访问的标志'404','NOT FOUND','护卫神','WAF','管理员','Forbidden','很抱歉',
@@ -63,9 +63,16 @@ class Tool():
             i=int(i.replace("=",''))
             list3.append(i)
         return list3
-    #将一个字符串变为列表
+    #处理两种情况 1.将一个端口形如80,8080字符串变为列表 2.将1-3000范围生成列表
     def split2List(self,string):
-        list1=string.split(',')
+        if '-' in string:
+            list1=[]
+            p='\d+'
+            num=re.findall(p,string)
+            for i in range(int(num[0]) ,(int(num[1]) if int(num[1])<65535 else 65536)):
+                list1.append(str(i))
+        else:    
+            list1=string.split(',')
         return list1
     #扫描从hosts.txt文件中读取出来的主机存活端口信息    
     def scan_host_ports(self,ip):
@@ -461,12 +468,12 @@ def menu():
     tool=Tool()
     address=""
     usage = """ 
-       -host   To scan the open ports of the Host
+       -host   To scan the open ports of the Host                             Default scanning ports are most usual ports
        -sh     Specific Host Detective                                        Example: -sh 127.0.0.1 
-       -ah     All alive Hosts .Find all alive hosts                          Example: -ah 192.168.1.1-255
+       -ah     All alive Hosts .Find all alive hosts                          Example: -ah 192.168.1.1-255 Default ports is 80 443
        -t      Threads(1-200) Default is 80
        -r      Read hosts file                                                Example: -r "hosts.txt"
-       -p      Port. Ping special ports,It was used to detective alive hosts  Example: -p="80,8080,443" default was 80 443 
+       -p      Ports                                                          Example: -p="80,8080,443" or -p 1-255 default are most usual ports
        -o      Output file address                                            Example: -o recoder.txt or -o D:\\recoder.txt
        -dir    Scanning visible background directory                          Example: -dir http://127.0.0.1
        -add    Dictionary File Address                                        Example: -dir http://127.0.0.1  -add C:\dic.txt
@@ -475,12 +482,12 @@ def menu():
        -help To show help information
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument('-host', dest='host', help='-h To scan the open ports of the Host')
+    parser.add_argument('-host', dest='host', help='-h To scan the open ports of the Host                      Default scanning ports are most usual ports   ')
     parser.add_argument('-sh', dest='sh', help='Specific Host Detective                                        Example: -sh 127.0.0.1 ')
     parser.add_argument('-ah', dest='ah', help='All alive Hosts .Find all alive hosts                          Example: -ah 192.168.1.1-255')
     parser.add_argument('-t', dest='t', help='Threads(1-200) Default is 80')
     parser.add_argument('-r', dest='r', help='Read hosts file                                                  Example: -r "hosts.txt"')
-    parser.add_argument('-p', dest='p', help='Port.Ping special ports,It was used to detective alive hosts     Example: -p="80,8080,443" default was 80 443')
+    parser.add_argument('-p', dest='p', help='Ports                                                            Example: -p="80,8080,443" or -p 1-255 default are most usual ports')
     parser.add_argument('-o', dest='o', help='Output file address                                              Example: -o recoder.txt or -o D:\\recoder.txt')
     parser.add_argument('-dir', dest='dir', help='Scanning visible background directory                        Example: -dir http://127.0.0.1' )
     parser.add_argument('-add', dest='add', help='Dictionary File Address                                      Example: -dir http://127.0.0.1  -add C:\dic.txt' )
@@ -497,10 +504,11 @@ def menu():
         if options.p:
             PortList=tool.changeList(tool.split2List(options.p))
             msg1=msg2=''
-            for i in PortList:
-                msg1+=str(i)+' '
-            msg2="[*] Scanning Ports :"+msg1
-            printc.printf(msg2,"skyblue")
+            if len(PortList)<50:
+                for i in PortList:
+                    msg1+=str(i)+' '
+                msg2="[*] Scanning Ports :"+msg1
+                printc.printf(msg2,"skyblue")
         s = tool.standardUrl(options.host)
         ip= tools.getIPByName(s)
         info="[+]Starting scanning:"+str(s)+"({ip})".format(ip=ip)
@@ -599,12 +607,12 @@ def menu():
 
 def helpInfo():
     helpInformaiton = """Usage:
-       -host   To scan the open ports of the Host
+       -host   To scan the open ports of the Host                             Default scanning ports are most usual ports
        -sh     Specific Host Detective                                        Example: -sh 127.0.0.1 
-       -ah     All alive Hosts .Find all alive hosts                          Example: -ah 192.168.1.1-255
+       -ah     All alive Hosts .Find all alive hosts                          Example: -ah 192.168.1.1-255 Default ports is 80 443
        -t      Threads(1-200) Default is 80
        -r      Read hosts file                                                Example: -r "hosts.txt"
-       -p      Port. Ping special ports,It was used to detective alive hosts  Example: -p="80,8080,443" default was 80 443 
+       -p      Ports                                                          Example: -p="80,8080,443" or -p 1-255 default are most usual ports
        -o      Output file address                                            Example: -o recoder.txt or -o D:\\recoder.txt
        -dir    Scanning visible background directory                          Example: -dir http://127.0.0.1
        -add    Dictionary File Address                                        Example: -dir http://127.0.0.1  -add C:\dic.txt
