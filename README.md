@@ -21,6 +21,7 @@
    11. 新增-url 和-page参数,自动化获取补天公益SRC厂商名单并且可保存生成txt文件
    12. 新增ip显示,例如您输入python scan.py -host http://www.baidu.com/ 程序会自动打印主机的ip地址方便您进一步操作
    13. 程序将变得模块化,例如以后的功能函数会写在modules目录下的文件里面,如tool.py里面放的全部是功能函数,功能函数的代码不会在出现在scan.py主文件里面。
+   14. 新增-types子域名扫描,支持三种类型扫描 1学校 2公司 3政府类网站,如果不指定类型也可以扫描但是扫描会很慢
 
 这是一款基于python3的小巧的扫描工具
 
@@ -29,15 +30,18 @@
 您只需要输入python scan.py -help就可以并且得到如下结果:  
 
       Usage:
-       -host   To scan the open ports of the Host                             Default scanning ports are the most usual ports
-       -sh     Specific Host Detective                                        Example: -sh 127.0.0.1 
+        -host   To scan the open ports of the Host                             Default scanning ports are most usual ports
+       -sh     Specific Host Detective                                        Example: -sh 127.0.0.1
        -ah     All alive Hosts .Find all alive hosts                          Example: -ah 192.168.1.1-255 Default ports is 80 443
        -t      Threads(1-200) Default is 80
        -r      Read hosts file                                                Example: -r "hosts.txt"
        -p      Ports                                                          Example: -p="80,8080,443" or -p 1-255 default are most usual ports
-       -o      Output file address                                            Example: -o recoder.txt or -o D:\\recoder.txt
+       -o      Output file address                                            Example: -o recoder.txt or -o D:\recoder.txt
        -dir    Scanning visible background directory                          Example: -dir http://127.0.0.1
        -add    Dictionary File Address                                        Example: -dir http://127.0.0.1  -add C:\dic.txt
+       -sdn    Subdomain names                                                Example: -sdn baidu.com -types 3  -sdn pku.edu.cn -types 1
+       -pro    Protocol                                                       Example: -pro https    Default Protocol is http
+       -types  Using different dictionary txt file                            1 2 3 means school gov company website,it can makes the result more reliable
        -url    Butian SRC list url                                            Example: -url https://butian.360.cn/Home/Active/company -page 10
        -page   Butian SRC Pages      Default is 10                            Example: -url https://butian.360.cn/Home/Active/company -page 10
        -help To show help information
@@ -81,7 +85,9 @@
 
  10. 获取补天公益SRC名单保存为txt文件 python scan.py  -url  https://butian.360.cn/Home/Active/company -page 10 -o 补天名单.txt
      ![补天公益SRC保存为txt文件](https://raw.githubusercontent.com/spacesec/images/master/scan/11.png)
-
+ 
+ 11. 扫描学校网站子域名  python scan.py -sdn pku.edu.cn -types 1 -t 200     //1学校 2公司 3政府类网站,如果不指定类型也可以扫描但是扫描会很慢
+     ![子域名扫描](https://raw.githubusercontent.com/spacesec/images/master/scan/12.png)
  
 
 ******************************************************************************
@@ -96,17 +102,21 @@ What you need to do is just download it and use it because have packaged all thi
 What you need to do is just type python scan.py -help and then you can get the result as follows
  
     Usage:
-       -host   To scan the open ports of the Host
+      -host   To scan the open ports of the Host                             Default scanning ports are most usual ports
        -sh     Specific Host Detective                                        Example: -sh 127.0.0.1
-       -ah     All alive Hosts .Find all alive hosts                          Example: -ah 192.168.1.1-255
+       -ah     All alive Hosts .Find all alive hosts                          Example: -ah 192.168.1.1-255 Default ports is 80 443
        -t      Threads(1-200) Default is 80
        -r      Read hosts file                                                Example: -r "hosts.txt"
-       -p      Port. Ping special ports,It was used to detective alive hosts  Example: -p="80,8080,443" default was 80 443
+       -p      Ports                                                          Example: -p="80,8080,443" or -p 1-255 default are most usual ports
        -o      Output file address                                            Example: -o recoder.txt or -o D:\recoder.txt
        -dir    Scanning visible background directory                          Example: -dir http://127.0.0.1
        -add    Dictionary File Address                                        Example: -dir http://127.0.0.1  -add C:\dic.txt
+       -sdn    Subdomain names                                                Example: -sdn baidu.com -types 3  -sdn pku.edu.cn -types 1
+       -pro    Protocol                                                       Example: -pro https    Default Protocol is http
+       -types  Using different dictionary txt file                            1 2 3 means school gov company website,it can makes the result more reliable
        -url    Butian SRC list url                                            Example: -url https://butian.360.cn/Home/Active/company -page 10
        -page   Butian SRC Pages      Default is 10                            Example: -url https://butian.360.cn/Home/Active/company -page 10
+       -help To show help information
 
 
 Advantage:small but powerful 

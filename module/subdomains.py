@@ -1,5 +1,7 @@
 import socket,os,threading,queue,time,re
-import printc
+from module import printc
+#import printc
+#from module import printc
 try:
     import requests
 except:
@@ -8,38 +10,6 @@ except:
 #线程锁        
 lock = threading.Lock()
 count  = 0  #计数
-
-def test():
-    printc.printf("124","red")
-
-#得到一个队列
-def GetQueue(list):
-    PortQueue = queue.Queue(65535)
-    for p in list:
-        PortQueue.put(p)
-    return PortQueue
-
-#导入需要的依赖包,如果用户没有安装则提示用户安装
-def importModules():
-    try:
-        import json
-    except:
-        msg1="\n[-] 检测到您还没有安装Python3的json依赖包,请使用 pip install json 安装\n"
-        printc.printf(msg1,'red')
-    try:
-        import requests
-    except:
-        msg1="\n[-] 检测到您还没有安装Python3的requests依赖包,请使用 pip install requests 安装\n"
-        printc.printf(msg1,'red')
-
-#通过域名获取ip
-def getIPByName(host):
-    try:
-        return socket.gethostbyname(host)
-    except:
-        return 0
-        pass
-
 #读取文件每一行并将文件内容存放在列表中
 def content2List(add):
     # cwd=os.getcwd()
@@ -100,7 +70,20 @@ def change2standard(res):
         else:
             result=res.text
         return bytes2str(result)
-
+#根据标题判断网站是否是可访问的
+def isVisible(title):
+    flag=["114网址导航","403Forbidden"]
+    remark=True
+    count=0
+    for i in flag:
+        if str(i) in title:
+            remark =False
+            break
+        # else:
+        #     count=count+1
+    # if count==len(flag):
+    #     remark=True
+    return remark
 
 #获取子域名类
 class getSubdomainNames(threading.Thread):
@@ -121,7 +104,7 @@ class getSubdomainNames(threading.Thread):
             # print(domain)
             #lock.acquire()
             try: 
-                res=requests.get(domain,timeout=2)
+                res=requests.get(domain,timeout=2.5)
                 result=change2standard(res)
                 # print(result)
                 # if ifExist(res)==True:
@@ -135,9 +118,12 @@ class getSubdomainNames(threading.Thread):
                 title=title.replace("\r","")
                 title=title.replace("\t","")
                 title=title.replace(" ",'')
-                count=count+1
-                msg1="[+] "+domain+"   "+title
-                printc.printf(msg1,'green')
+                if isVisible(title)==True:
+                    count=count+1
+                    msg1="[+] "+domain+"   "+title
+                    printc.printf(msg1,'green')
+                else:
+                    pass
             except:
                 # msg2=domain+"不可访问"
                 # printc.printf(msg2,'red')
@@ -146,13 +132,15 @@ class getSubdomainNames(threading.Thread):
 #根据不同的类型选择不同的字典 1 subnames_school 2 subnames_gov 3 subnames_company 0 default subnames ,当然也支持用户自定义字典
 def dicJudgeByInput(Input):
     if Input==0:
-        return os.getcwd().replace("module","dict\subnames.txt")
+        return os.getcwd()+"\dict\subnames.txt"
     elif Input==1:
         return os.getcwd()+"\dict\subnames_school.txt"
     elif Input==2:
-        return os.getcwd().replace("module","dict\subnames_gov.txt")
+        return os.getcwd()+"\dict\subnames_gov.txt"
     elif Input==3:
-        return os.getcwd().replace("module","dict\subnames_company.txt")
+        return os.getcwd()+"\dict\subnames_company.txt"
+    elif Input==5:
+        return os.getcwd().replace("module","\dict\subnames_school.txt")
     else:
         return Input 
 #判断网站使用的是http或者https
@@ -163,6 +151,12 @@ def httpOrHttps(protocol):
         protocol="http"
         return protocol
 
+#得到一个队列
+def GetQueue(list):
+    PortQueue = queue.Queue(65535)
+    for p in list:
+        PortQueue.put(p)
+    return PortQueue
 
 #获取子域名
 def getSubdomainName(nThreads,Num,domain,protocol):
@@ -183,7 +177,5 @@ def getSubdomainName(nThreads,Num,domain,protocol):
     printc.printf(msg1,"green")
     printc.printf(msg2,"green")
 if __name__=='__main__':
-    getSubdomainName(300,1,"ncu.edu.cn","http")
-    #bingRequests("site:ncu.edu.cn")
-    #delUseless("D:\\Github\\scan\\dict\\subnames_school.txt")
+    getSubdomainName(300,5,"ncu.edu.cn","http")
 

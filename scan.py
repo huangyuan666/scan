@@ -1,6 +1,6 @@
 # -- coding: utf-8 --
 import threading, socket,time,os,re,sys,string
-from module import printc,butianInfo,queue,argparse
+from module import printc,butianInfo,queue,argparse,subdomains
 from module import tool as tools
 try:
     import json
@@ -16,7 +16,7 @@ except:
 PortList=[21,22,23,25,31,42,53,67,68,69,79,80,81,85,99,102,109,135,137,138,139,143,161,389,443,445,456,
 513,554,593,635,636,646,873,902,903,912,913,993,1000,1001,1029,1011,1024,1043,1044,1080,1170,1234,1245,1433,1502,1536,
 1537,1538,1539,1540,1542,1543,1544,1547,1548,1549,1801,1935,2066,2500,2504,2601,2602,2604,2869,3306,3389,3443,4000,4444,
-4224,4444,4900,5040,5357,5554,6000,6942,70004,7005,7006,7007,7680,7702,7720,7739,7777,7778,7779,7780,7807,7831,7833,8080,8085,8088,8161,8888,8307,8443,8800,8889,9015,9075,9081,9086,
+4224,4444,4900,5040,5357,5554,6000,6942,70004,7005,7006,7007,7080,7680,7702,7720,7739,7777,7778,7779,7780,7807,7831,7833,8080,8085,8088,8161,8888,8307,8443,8800,8889,9015,9075,9081,9086,
 9087,9095,9144,9156,9666,9999,12051,13223,14367,14601,14610,14611,14612,14613,14614,14615,14616,14617,14618,14619,14620,14621,21440,21441,28317,35432,48620,62078,63342,65000]
 #判断主机是否存活的端口
 ports=[80,443]
@@ -463,6 +463,25 @@ def scanDir(host,add):
     # except:
     #     pass
 
+#获取子域名
+def getSubdomainName(nThreads,Num,domain,protocol):
+    global count
+    start_time=time.time()
+    add=tools.dicJudgeByInput(Num)
+    subdomains=tools.GetQueue(tools.content2List(add))
+    ThreadList=[]
+    for i in range(0, nThreads):
+        t = tools.getSubdomainNames(subdomains,domain,protocol)
+        ThreadList.append(t)
+    for t in ThreadList:
+        t.start()
+    for t in ThreadList:
+        t.join()
+    msg1="[+] Time cost:"+str(time.time()-start_time)+" s"
+    msg2="[+] {count} subdomains have been found".format(count=tools.getCount())
+    printc.printf(msg1,"yellow")
+
+
 def menu():
     global nThread,ports,PortList,response
     tool=Tool()
@@ -477,6 +496,9 @@ def menu():
        -o      Output file address                                            Example: -o recoder.txt or -o D:\\recoder.txt
        -dir    Scanning visible background directory                          Example: -dir http://127.0.0.1
        -add    Dictionary File Address                                        Example: -dir http://127.0.0.1  -add C:\dic.txt
+       -sdn    Subdomain names                                                Example: -sdn baidu.com -types 3  -sdn pku.edu.cn -types 1 
+       -pro    Protocol                                                       Example: -pro https    Default Protocol is http  
+       -types  Using different dictionary txt file                            1 2 3 means school gov company website,it can makes the result more reliable 
        -url    Butian SRC list url                                            Example: -url https://butian.360.cn/Home/Active/company -page 10
        -page   Butian SRC Pages      Default is 10                            Example: -url https://butian.360.cn/Home/Active/company -page 10
        -help To show help information
@@ -491,6 +513,9 @@ def menu():
     parser.add_argument('-o', dest='o', help='Output file address                                              Example: -o recoder.txt or -o D:\\recoder.txt')
     parser.add_argument('-dir', dest='dir', help='Scanning visible background directory                        Example: -dir http://127.0.0.1' )
     parser.add_argument('-add', dest='add', help='Dictionary File Address                                      Example: -dir http://127.0.0.1  -add C:\dic.txt' )
+    parser.add_argument('-sdn', dest='sdn', help='Subdomain names                                              Example: -sdn baidu.com -types 3  -sdn pku.edu.cn -types 1 -sdn cn.gov.cn -types 2 ' )
+    parser.add_argument('-pro', dest='pro', help='Protocol                                                     Example: -pro https    Default Protocol is http ' )
+    parser.add_argument('-types', dest='types', help='Using different dictionary txt file                            1 2 3  means school government company website,it can makes the result more reliable' )
     parser.add_argument('-url', dest='url', help='Butian SRC list url                                          Example: -url https://butian.360.cn/Home/Active/company' )
     parser.add_argument('-page', dest='page', help='Butian SRC Pages      Default is 10                        Example: -url https://butian.360.cn/Home/Active/company' )
     parser.add_argument('-help', action="store_true", help='To show help information')
@@ -601,7 +626,24 @@ def menu():
             page=10
         butianInfo.get_src_name(url,page)
         tool.printIfExist(address)
-    
+    elif options.sdn:
+        domain = options.sdn
+        if options.o:
+            address = tool.address(options.o)   
+            tool.output(address)
+        if options.t:
+            tool.nThreads(options.t)
+        if options.pro:
+            protocol = options.pro
+        else:
+            protocol = "http"
+        if options.types:
+            types = int(options.types) 
+        else:
+            types = 0
+        subdomains.getSubdomainName(nThread,types,domain,protocol)
+        #subdomains.getSubdomainName(300,1,"ncu.edu.cn","http")
+        tool.printIfExist(address)
     if options.help:
               helpInfo()
 
@@ -616,6 +658,9 @@ def helpInfo():
        -o      Output file address                                            Example: -o recoder.txt or -o D:\\recoder.txt
        -dir    Scanning visible background directory                          Example: -dir http://127.0.0.1
        -add    Dictionary File Address                                        Example: -dir http://127.0.0.1  -add C:\dic.txt
+       -sdn    Subdomain names                                                Example: -sdn baidu.com -types 3  -sdn pku.edu.cn -types 1 
+       -pro    Protocol                                                       Example: -pro https    Default Protocol is http  
+       -types  Using different dictionary txt file                            1 2 3 means school gov company website,it can makes the result more reliable 
        -url    Butian SRC list url                                            Example: -url https://butian.360.cn/Home/Active/company -page 10
        -page   Butian SRC Pages      Default is 10                            Example: -url https://butian.360.cn/Home/Active/company -page 10
        -help To show help information
@@ -624,3 +669,4 @@ def helpInfo():
 
 if __name__=='__main__':
     menu()
+
