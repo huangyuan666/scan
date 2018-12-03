@@ -1,5 +1,5 @@
 import socket,os,threading,queue,time,re
-import printc
+from module import printc
 try:
     import requests
 except:
