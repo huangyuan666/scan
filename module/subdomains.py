@@ -18,11 +18,12 @@ def content2List(add):
     f=open(add,"rb")
     for line in f.readlines():
         dirList.append(str(line)[2:-5])
+    #print("Length is:"+str(len(dirList)))
     return dirList
 
 #判断是否访问的页面是否存在
 def ifExist(res):
-    symbol=["404","NOT FOUND","对不起"]
+    symbol=["404","NOT FOUND","对不起","页面不存在","502BadGateway"]
     p="<title>([\W\w]*?)</title>"
     for i in symbol:
         if i in re.findall(p,res)[0]:
@@ -72,7 +73,7 @@ def change2standard(res):
         return bytes2str(result)
 #根据标题判断网站是否是可访问的
 def isVisible(title):
-    flag=["114网址导航","403Forbidden"]
+    flag=["114网址导航","403Forbidden","NotFound","页面不存在","出错","502BadGateway","访问被拒绝","BadRequest"]
     remark=True
     count=0
     for i in flag:
@@ -87,24 +88,24 @@ def isVisible(title):
 
 #获取子域名类
 class getSubdomainNames(threading.Thread):
-    def __init__(self,subdomains,domain,protocol):
+    def __init__(self,subdomains,domain1,protocol):
         threading.Thread.__init__(self)
         self.subdomains=subdomains
-        self.domain=domain
-        self.protocol=protocol
+        self.domain1=domain1
+        self.protocol=str(protocol)
         self.p="<title>([\W\w]*?)</title>"
         self.p1="<TITLE>([\W\w]*?)</TITLE>"
     def run(self):
         global lock,count
-        domain=self.domain
+        domain1=self.domain1
         while not self.subdomains.empty():
             subdomain=self.subdomains.get()
             # domain=httpOrHttps(domain)+"://" +subdomain+"."+domain
-            domain=httpOrHttps(self.protocol)+"://" +subdomain+"."+domain
+            domain=httpOrHttps(self.protocol)+str("://") +str(subdomain)+"."+str(domain1)
             # print(domain)
             #lock.acquire()
             try: 
-                res=requests.get(domain,timeout=2.5)
+                res=requests.get(domain,timeout=4)
                 result=change2standard(res)
                 # print(result)
                 # if ifExist(res)==True:
@@ -119,13 +120,15 @@ class getSubdomainNames(threading.Thread):
                 title=title.replace("\t","")
                 title=title.replace(" ",'')
                 if isVisible(title)==True:
-                    count=count+1
-                    msg1="[+] "+domain+"   "+title
-                    printc.printf(msg1,'green')
+                    if lock.acquire():
+                        count=count+1
+                        msg1="[+] "+domain+"   "+title
+                        printc.printf(msg1,'green')
+                        lock.release()
                 else:
                     pass
             except:
-                # msg2=domain+"不可访问"
+                # msg2="[-] "+domain+"不可访问"
                 # printc.printf(msg2,'red')
                 pass
             #lock.release()
@@ -149,11 +152,11 @@ def httpOrHttps(protocol):
         protocol="https"
     else:
         protocol="http"
-        return protocol
+    return protocol
 
 #得到一个队列
 def GetQueue(list):
-    PortQueue = queue.Queue(65535)
+    PortQueue = queue.Queue()
     for p in list:
         PortQueue.put(p)
     return PortQueue
@@ -174,8 +177,8 @@ def getSubdomainName(nThreads,Num,domain,protocol):
         t.join()
     msg1="[+] Time cost:"+str(time.time()-start_time)+" s"
     msg2="[+] {count} Subdomains have been found".format(count=count)
-    printc.printf(msg1,"green")
-    printc.printf(msg2,"green")
+    printc.printf(msg1,"yellow")
+    printc.printf(msg2,"yellow")
 if __name__=='__main__':
     getSubdomainName(300,5,"ncu.edu.cn","http")
 
