@@ -1,5 +1,6 @@
 import socket,os,threading,queue,time,re
 from module import printc
+from module import tool as tools
 #import printc
 #from module import printc
 try:
@@ -122,7 +123,7 @@ class getSubdomainNames(threading.Thread):
                 if isVisible(title)==True:
                     if lock.acquire():
                         count=count+1
-                        msg1="[+] "+domain+"   "+title
+                        msg1="[+] "+tools.setStr2SameLen(30,domain)+title
                         printc.printf(msg1,'green')
                         lock.release()
                 else:

@@ -163,6 +163,12 @@ def httpOrHttps(protocol):
         protocol="http"
         return protocol
 
+#将字符串设定为统一长度
+def setStr2SameLen(length,string):
+    length=length-len(string)
+    for i in range(length):
+        string=string+' '
+    return string
 
 #获取子域名
 def getSubdomainName(nThreads,Num,domain,protocol):
